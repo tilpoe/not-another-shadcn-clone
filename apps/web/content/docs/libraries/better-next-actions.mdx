@@ -1,0 +1,138 @@
+---
+title: "Better Next Actions"
+description: "A better way to manage your next actions"
+---
+
+<Typography type="blockquote">
+  This is a forked version of the next-safe-action package. <br />
+  See original source here: https://github.com/TheEdoRan/next-safe-action <br />
+  The original package is licensed under the MIT license.
+</Typography>
+
+## Installation
+
+<Steps>
+
+<Step>Create lib/actions/shared.ts</Step>
+
+<ComponentSource name="actions/shared.ts" type="lib" />
+
+<Step>Create lib/actions/index.ts</Step>
+
+<ComponentSource name="actions/index.ts" type="lib" />
+
+</Steps>
+
+## What changed?
+
+### Aliases for status-checking
+
+For convinience I added boolean values to the client hook that can be used instead of checking against the `status` variable.
+
+```ts
+// action as a client hook
+const myAction = useBetterAction(action);
+
+// aliases
+myAction.isIdle; // equals myAction.status === "idle"
+myAction.isExecuting; // equals myAction.status === "executing"
+myAction.hasSucceeded; // equals myAction.status === "hasSucceeded"
+myAction.hasErrored; // equals myAction.status === "hasErrored"
+```
+
+### Curry the action handler
+
+In the original package the created client takes two arguments: the schema and the implementation. To establish the new features i wanted to introduce, the client now is a function that takes the `schema` as first argument and an optional `options` object as the second one. It then returns another function that takes the implementation as argument. In the implementation callback, the input and context (and other new things) aren't seperate arguments anymore, but one object.
+
+```ts
+// before
+const action = createAction(
+  z.object({ id: z.string() }),
+  async (input, ctx) => {
+    // ... implementation
+  }
+);
+
+// after
+const action = createAction(z.object({ id: z.string() }), {
+  // ... options
+})(async ({ input, ctx }) => {
+  // ... implementation
+});
+```
+
+### Add optional custom errors that can be checked with typesafety
+
+I always wanted to be able to throw some simple error messages that I can check for in the onError callback with automatic typesafety. One can now add those custom error messages in the added option argument in the action-client as an array. The implementation callback then exposes a function `error` which you can use to throw a defined message. On the client you can then check for the error message via the first `error` argument in the `onError` callback.
+
+```ts
+// defining action
+const addUserAction = createAction(z.object({ email: z.string().email() }), {
+  // define the error messages
+  errors: ["EMAIL_ALREADY_USED"],
+})(async ({ ctx, input, error }) => {
+  // check if user with given email exists
+  if (user) {
+    error("EMAIL_ALREADY_USED"); // throws an error
+  }
+});
+
+// on the client
+const addUser = useBetterAction(addUserAction, {
+  onError: (e) => {
+    if (e.actionError === "EMAIL_ALREADY_USED") {
+      // ... handle error
+    }
+  },
+});
+```
+
+### Add custom options for middleware.
+
+**_!!! CAUTION: The implementation uses two @ts-ignores, so i don't know if there could potentially be a way to break this feature typewise but i will just ignore that for my own sanity !!!_**
+
+I was missing the option to add custom information to an action (kinda like the `meta` field in tRPC), which then could be used in the middleware. That's why i added the possibility to define them directly in the `middleware` function.
+
+```ts
+// example: add custom field to check if the user is authenticated every time the action gets called
+
+const createAction = createBetterActionClient({
+  // just explicitly type the first argument of the middleware function
+  async middleware(opts?: { secured?: boolean }) {
+    const session = await getSession();
+
+    if (opts?.secured && !session?.user) {
+      // when the secured flag is set and the user is not logged in: throw error
+      throw new Error("Unauthorized");
+    }
+
+    // return the context in the known way
+    return {
+      //...
+    };
+  },
+});
+
+const addItemAction = createAction(z.object({ name: z.string() }), {
+  // ... now all options defined in the middleware function are exposed in this object
+  secured: true,
+})(async ({ ctx, input }) => {
+  // ...
+});
+```
+
+### Add executeAsync
+
+In some cases i wanted to wait for the result of the executing hook but that was not possible in the original package. The function will only throw if an unknown error occurs. In every other case the function will return an object with a key "ok" which is either true, which reveals the returned data or false, which reveals the possible errors. I decided to do that because you can still check for the custom custom action errors in a typesafe way. If an error would be thrown, one couldn't directly infer the error from it, without any additional functions.
+
+```ts
+const myAction = useBetterAction(action);
+
+async function execute() {
+  const res = await myAction.executeAsync();
+}
+```
+
+### No useOptimisticAction
+
+I currently don't use it and was to lazy to get busy with implementing it with the new features.

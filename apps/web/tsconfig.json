@@ -1,0 +1,23 @@
+{
+  "extends": "@-package-/tsconfig/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "contentlayer/generated": ["./.contentlayer/generated"]
+    },
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+  },
+  "include": [
+    ".eslintrc.cjs",
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.mts",
+    "**/*.cjs",
+    "**/*.js",
+    ".next/types/**/*.ts",
+    "env.js"
+  ],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,52 @@
+{
+  "name": "@-package-/dummy",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.2.0",
+  "author": "Til Pöhnitzsch",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./hook": "./dist/hook.mjs"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.mts"
+      ],
+      "hook": [
+        "./dist/hook.d.mts"
+      ]
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "eslint .",
+    "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
+    "typecheck": "tsc --noEmit",
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "devDependencies": {
+    "@-package-/eslint-config": "0.2.0",
+    "@-package-/prettier-config": "^0.1.0",
+    "@-package-/tsconfig": "^0.1.0",
+    "eslint": "^8.54.0",
+    "prettier": "^3.1.0",
+    "tsup": "^7.2.0",
+    "typescript": "^5.3.2"
+  },
+  "eslintConfig": {
+    "extends": [
+      "@-package-/eslint-config/base"
+    ]
+  },
+  "prettier": "@-package-/prettier-config"
+}

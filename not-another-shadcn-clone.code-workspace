@@ -1,0 +1,17 @@
+{
+  "folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "../shadcn-clone"
+    },
+    {
+      "path": "../monorepo-starter"
+    },
+    {
+      "path": "../../work/feierstoff/feiertool"
+    }
+  ],
+  "settings": {}
+}

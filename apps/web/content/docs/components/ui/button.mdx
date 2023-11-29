@@ -1,0 +1,31 @@
+---
+title: Button
+description: A button allows a user to perform an action, with mouse, touch, and keyboard interactions.
+api: https://react-spectrum.adobe.com/react-aria/Button.html
+---
+
+<ComponentPreview name="ui/button/demo.tsx" />
+
+## Installation
+
+<Steps>
+
+<Step>Copy and paste the following code into your project.</Step>
+
+<ComponentSource name="ui/button/index.tsx" />
+
+<Step>Update the import paths to match your project setup.</Step>
+
+</Steps>
+
+## Link
+
+You can use the `buttonVariants` helper to create a link that looks like a button.
+
+```tsx
+import { buttonVariants } from "@/components/ui/button";
+```
+
+```tsx
+<Link className={buttonVariants({ variant: "outline" })}>Click here</Link>
+```

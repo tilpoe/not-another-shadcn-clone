@@ -1,0 +1,223 @@
+---
+title: Typesafe Next.js Navigation
+description: Utils for type safe routing in Next.js
+---
+
+## Setup
+
+<Steps>
+
+### Activate typed routes in next.js config
+
+### Add helpers
+
+```tsx title="lib/next-navigation/index.ts"
+import type { Route } from "next"
+import type { LinkProps } from "next/link"
+import { redirect as nextRedirect } from "next/navigation"
+
+type InferRoutes<T> = T extends {
+  href: infer H
+}
+  ? H
+  : never
+
+export type InferredRoutes<RouteType> = InferRoutes<LinkProps<RouteType>>
+
+export function redirect<RouteType>(href: InferredRoutes<RouteType>): never {
+  return nextRedirect(href as string)
+}
+
+export const route = <RouteType,>(
+  href: InferredRoutes<RouteType>,
+  searchParams?: Record<string, string>
+) => {
+  let result = href as string
+  if (searchParams) {
+    const search = new URLSearchParams(searchParams).toString()
+    result = `${result}?${search}`
+  }
+  return result as Route
+}
+
+export const routeAsString = <RouteType,>(
+  href: InferredRoutes<RouteType>,
+  searchParams?: Record<string, string>
+) => {
+  return route(href, searchParams) as string
+}
+
+/**
+ * TODO: This matcher doesn't match dynamic parts that include "[" or "]".
+ *
+ * @param route
+ * @returns
+ */
+/* export function matchesAnyRoute(route: string) {
+  for (const toMatch of routes) {
+    const matchedRoute = toMatch;
+    const pattern = new RegExp(
+      `^${toMatch
+        .replace(/\[\.\.\.\w+\]/g, ".+?")
+        .replace(/\[[^\]]+\]/g, "[^/]+")}$`,
+    );
+    if (pattern.test(route)) {
+      return matchedRoute;
+    }
+  }
+
+  return null;
+} */
+
+export function matchesRoute<RouteType>(
+  route: string,
+  toMatch: InferredRoutes<RouteType>
+) {
+  const pattern = new RegExp(
+    `^${(toMatch as string)
+      .replace(/\[\.\.\.\w+\]/g, ".+?")
+      .replace(/\[[^\]]+\]/g, "[^/]+")}$`
+  )
+  return pattern.test(route)
+}
+```
+
+</Steps>
+
+## Client hooks to parse (search) params
+
+```tsx title="lib/next-navigation/parser-hooks.ts"
+"use client"
+
+import { useParams, useSearchParams } from "next/navigation"
+import type { z } from "zod"
+
+export function useParseSearchParams<TSchema extends z.ZodType>(
+  schema: TSchema
+) {
+  const searchParamsObject = useSearchParams()
+
+  if (!searchParamsObject) {
+    throw new Error("useParseSearchParams: No search params.")
+  }
+
+  const unparsedSearchParams: Record<string, string> = {}
+  for (const [key, value] of searchParamsObject.entries()) {
+    unparsedSearchParams[key] = value
+  }
+
+  const searchParams = schema.safeParse(unparsedSearchParams)
+
+  if (!searchParams.success) {
+    throw new Error("useParseSearchParams: Invalid search params.")
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return searchParams.data as TSchema["_output"]
+}
+
+export function useParseParams<TSchema extends z.ZodType>(schema: TSchema) {
+  const unparsedParams = useParams()
+
+  if (!unparsedParams) {
+    throw new Error("useParseParams: No params.")
+  }
+
+  const params = schema.safeParse(unparsedParams)
+
+  if (!params.success) {
+    throw new Error("useParseSearchParams: Invalid search params.")
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return params.data as TSchema["_output"]
+}
+```
+
+## Server functions to parse (search) params
+
+```tsx title="lib/next-navigation/parser.ts"
+import type { InferredRoutes } from "@/essentials/next-navigation"
+import type { z } from "zod"
+
+import { redirect } from "@/lib/next-navigation"
+
+interface ParseOptions<TSchema extends z.ZodType> {
+  schema: TSchema
+}
+
+export const parseSearchParams = <TSchema extends z.ZodType>(
+  unparsedSearchParams: unknown,
+  options: ParseOptions<TSchema>
+) => {
+  const params = options.schema.safeParse(unparsedSearchParams)
+
+  if (!params.success) {
+    return undefined
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return params.data as TSchema["_input"]
+}
+
+export const parseSearchParamsWithRedirect = <
+  TSchema extends z.ZodType,
+  RouteType
+>(
+  unparsedSearchParams: unknown,
+  options: ParseOptions<TSchema> & {
+    redirectTo: InferredRoutes<RouteType>
+  }
+) => {
+  const { redirectTo, ...restOptions } = options
+
+  const params = parseSearchParams(unparsedSearchParams, restOptions)
+
+  if (!params) {
+    redirect(redirectTo)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return params as TSchema["_input"]
+}
+```
+
+## Other Utils
+
+```tsx title="lib/next-navigation/utils.ts"
+export function getSearchParamsFromUrl(
+  url: string
+): Record<string, string | string[] | undefined> {
+  return Object.fromEntries(new URL(url).searchParams)
+}
+
+/**
+ * URI decodes a param and transforms it into lowercase
+ *
+ * @param value
+ * @returns
+ */
+export function decodeParam(value: string) {
+  return decodeURIComponent(value).toLowerCase()
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function encodeParam(param: any): string {
+  if (Array.isArray(param)) {
+    return param.map((p) => encodeParam(p)).join("/")
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+  return encodeURIComponent(param.toString())
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createQueryParams(params: Record<string, any>): string {
+  return (
+    Object.entries(params)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+      .map(([key, value]) => `${key}=${encodeURIComponent(value.toString())}`)
+      .join("&")
+  )
+}
+```

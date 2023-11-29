@@ -1,0 +1,52 @@
+---
+title: Installation
+---
+
+import { Alert, AlertDescription } from "@/collection/ui/alert";
+
+<Alert type="warning" className="my-4">
+  <AlertDescription>
+    This is an unofficial port of https://ui.shadcn.com/ and is not affiliated
+    with @shadcn. I wanted to be able to copy the base code of my customized
+    components and easily paste them into new projects and the project of shadcn
+    was an awesome starting point.
+  </AlertDescription>
+</Alert>
+<Alert type="error">
+  <AlertDescription>
+    I have no intention of maintaining this project in a way that would be
+    useful to anyone other than myself.
+  </AlertDescription>
+</Alert>
+
+## Start
+
+A good starting point is to clone the monorepo template, because the most important configurations are already done there:
+
+```bash
+git clone https://github.com/tilpoe/monorepo-starter my-project
+```
+
+## Setting up the project
+
+<Steps>
+
+<Step>Install base packages.</Step>
+
+```bash
+pnpm add react-aria-components @radix-ui/react-slot usehooks-ts lucide-react cva@beta tailwindcss-react-aria-components react-hook-form @hookform/resolvers
+```
+
+<Step>Add to plugins in tailwind.config.ts.</Step>
+
+```ts
+require("tailwindcss-react-aria-components")({ prefix: "s" });
+```
+
+<Step>Install obligatory libraries and components.</Step>
+
+- [Form Library](/docs/library/form)
+- [Utils Library](/docs/library/utils)
+- [Form Components](/docs/components/ui/form)
+
+</Steps>

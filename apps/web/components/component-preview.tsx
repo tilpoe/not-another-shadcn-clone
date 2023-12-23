@@ -30,6 +30,7 @@ export function ComponentPreview({
   const Code = Codes[0];
 
   const Preview = React.useMemo(() => {
+    console.log(name);
     const Component = React.lazy(() => import(`@/collection/${name}`));
 
     if (!Component) {
@@ -60,7 +61,7 @@ export function ComponentPreview({
 
   return (
     <div
-      className={cn("group relative flex flex-col space-y-2", className)}
+      className={cn("group relative mt-4 flex flex-col space-y-2", className)}
       {...props}
     >
       <Tabs defaultValue="preview" className="relative mr-auto w-full">

@@ -1,0 +1,44 @@
+---
+title: PDF
+description: Utils for PDF generation.
+---
+
+## Installation
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+pnpm add @react-pdf
+```
+
+<Step>Create `lib/pdf/pdf.tsx`</Step>
+
+<ComponentSource name="pdf/pdf.tsx" type="lib" />
+
+<Step>Create lib/pdf/utils.ts</Step>
+
+<ComponentSource name="pdf/utils.ts" type="lib" />
+
+</Steps>
+
+## Usage in route handler
+
+<Alert type="error">
+  <AlertTitle>NOTE</AlertTitle>
+  <AlertDescription>
+    If there is a <b>TypeError: ba.Component is not a constructor</b> error,
+    replace <i>@react-pdf/renderer</i> in utils.ts with
+    <i>@joshuajaco/react-pdf-renderer-bundled</i>.
+  </AlertDescription>
+</Alert>
+
+```tsx title="PDF as instant download"
+export function GET() {
+  const pdfBuffer = await generatePdfFromComponent(<Pdf />);
+  const response = new Response(pdfBuffer);
+  response.headers.set("Content-Type", "application/pdf");
+  return response;
+}
+```

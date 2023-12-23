@@ -1,29 +1,43 @@
-"use client";
-
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo } from "react";
+import { cva } from "cva";
+import { ChevronsUpDown, X } from "lucide-react";
 import {
+  Button,
+  Header,
+  ListBox,
+  ListBoxItem,
   Popover,
-  PopoverContent,
-  PopoverPortal,
-  PopoverTrigger,
-} from "@radix-ui/react-popover";
-import { X } from "lucide-react";
-import { useElementSize } from "usehooks-ts";
+  Select as RaSelect,
+  Section,
+} from "react-aria-components";
 
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/collection/ui/command";
 import type { FormComponentBaseProps } from "@/collection/ui/form";
 import { Description, formVariants, Label } from "@/collection/ui/form";
 import { popoverVariants } from "@/collection/ui/popover";
 import { useFormFieldContext } from "@/lib/form/context";
 import { useCustomAriaIds } from "@/lib/form/utils";
 import { autoRef, cn } from "@/lib/utils";
+
+/* -------------------------------------------------------------------------- */
+/*                                  Variants                                  */
+/* -------------------------------------------------------------------------- */
+
+export const selectVariants = {
+  group: cva({
+    base: cn("overflow-hidden p-1 text-foreground"),
+  }),
+  item: cva({
+    base: cn(
+      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none ",
+      "s-selected:bg-accent s-selected:text-accent-foreground",
+      "s-focused-visible:bg-accent s-focused-visible:text-accent-foreground",
+      "s-hover:bg-accent s-hover:text-accent-foreground",
+    ),
+  }),
+  header: cva({
+    base: cn("px-2 py-1.5 text-xs font-medium text-muted-foreground"),
+  }),
+};
 
 /* -------------------------------------------------------------------------- */
 /*                                    Types                                   */
@@ -54,7 +68,7 @@ export type SelectBaseProps<TValue = null> = {
   onSelect?: (option: SelectOption<TValue>) => void; // this event handles everything that happens when you click on an option, except for the state change itself
   placeholder?: string;
 } & {
-  ref?: React.ComponentPropsWithRef<typeof PopoverContent>["ref"];
+  ref?: React.ComponentPropsWithRef<typeof RaSelect>["ref"];
 };
 
 type DependentOnChange<TValue> =
@@ -69,20 +83,16 @@ type DependentOnChange<TValue> =
 
 export type SelectProps<TValue = null> = FormComponentBaseProps &
   SelectBaseProps<TValue> &
-  (
-    | ({
-        multi?: false;
-        value: SelectOption<TValue> | null;
-      } & DependentOnChange<TValue>)
-    | {
+  ({
+    value: SelectOption<TValue> | null;
+  } & DependentOnChange<TValue>) &
+  /*     | {
         multi: true;
         value: SelectOptions<TValue>;
         isResettable?: boolean;
         onChange?: (options: SelectOptions<TValue>) => void; // this event only handles the value change
-      }
-  ) &
-  (
-    | {
+      } */
+  (| {
         type: "combo";
         searchLabel?: string;
         notFoundLabel?: string;
@@ -101,82 +111,25 @@ type SelectPropsWithoutRef<TValue = null> = React.PropsWithoutRef<
 /* -------------------------------------------------------------------------- */
 
 function valueIsEmpty<TValue>(props: SelectPropsWithoutRef<TValue>) {
-  if (props.multi) {
-    return props.value === null || props.value.length === 0;
-  } else {
-    return props.value === null;
-  }
+  return props.value === null;
 }
 
-function valueIsSelected<TValue>(
+/* function valueIsSelected<TValue>(
   props: SelectPropsWithoutRef<TValue>,
   option: SelectOption<TValue>,
 ) {
-  if (props.multi) {
-    return props.value.includes(option);
-  } else {
-    return props.value?.value === option.value;
-  }
-}
+  return props.value?.value === option.value;
+} */
 
 /* -------------------------------------------------------------------------- */
 /*                                 Components                                 */
 /* -------------------------------------------------------------------------- */
 
-const Input = <TValue,>(props: SelectPropsWithoutRef<TValue>) => {
-  switch (props.type) {
-    case "combo": {
-      return <CommandInput placeholder={props.searchLabel} />;
-    }
-    default: {
-      return (
-        <CommandInput className="sr-only border-none p-0" aria-hidden="true" />
-      );
-    }
-  }
-};
+/* ------------------------------- ResetButton ------------------------------ */
 
-const Empty = <TValue,>(props: SelectPropsWithoutRef<TValue>) => {
-  switch (props.type) {
-    case "combo": {
-      return <CommandEmpty>{props.notFoundLabel}</CommandEmpty>;
-    }
-    default: {
-      return null;
-    }
-  }
-};
-
-const Placeholder = ({ children }: { children?: React.ReactNode }) => {
-  return (
-    <span className={"block truncate text-sm italic text-muted-foreground"}>
-      {children}
-    </span>
-  );
-};
-
-const Title = <TValue,>(props: SelectPropsWithoutRef<TValue>) => {
-  const selectedClassNames = cn(
-    "block truncate text-sm",
-    props.classNames?.selected,
-  );
-
-  if (!props.multi) {
-    if (props.value === null) {
-      return <Placeholder>{props.placeholder}</Placeholder>;
-    }
-
-    return <span className={selectedClassNames}>{props.value.label}</span>;
-  }
-
-  if (props.value.length === 0) {
-    return <Placeholder>{props.placeholder}</Placeholder>;
-  }
-
-  return <span className={selectedClassNames}>{props.value.join(", ")}</span>;
-};
-
-const ResetButton = <TValue,>(props: SelectPropsWithoutRef<TValue>) => {
+export const SelectResetButton = <TValue,>(
+  props: SelectPropsWithoutRef<TValue>,
+) => {
   if (props.isResettable && !valueIsEmpty(props)) {
     return (
       <div
@@ -184,11 +137,7 @@ const ResetButton = <TValue,>(props: SelectPropsWithoutRef<TValue>) => {
         aria-hidden="true"
         onClick={(e) => {
           e.stopPropagation();
-          if (props.multi) {
-            props.onChange?.([]);
-          } else {
-            props.onChange?.(null);
-          }
+          props.onChange?.(null);
         }}
         className="mr-2 rounded-full p-1 hover:bg-muted"
       >
@@ -200,46 +149,98 @@ const ResetButton = <TValue,>(props: SelectPropsWithoutRef<TValue>) => {
   return null;
 };
 
-const Item = <TValue,>(
+/* ------------------------------ SelectedValue ----------------------------- */
+
+const SelectSelectedValue = <TValue,>(
   props: SelectPropsWithoutRef<TValue> & {
-    option: SelectOption<TValue>;
-    setIsOpen: (isOpen: boolean) => void;
+    id: string;
   },
 ) => {
-  function handleSelectOption(option: SelectOption<TValue>) {
-    if (!props.multi) {
-      props.onChange?.(option);
-    }
-    props.onSelect?.(option);
-    props.setIsOpen(false);
+  const selectedClassNames = cn(
+    "block truncate text-sm text-foreground",
+    props.classNames?.selected,
+  );
+
+  if (props.value === null || props.value === undefined) {
+    return (
+      <span
+        id={props.id}
+        className={"block truncate text-sm italic text-muted-foreground"}
+      >
+        {props.placeholder}
+      </span>
+    );
   }
 
   return (
-    <CommandItem
-      disabled={props.option.disabled}
-      value={props.option.label}
-      onSelect={() => {
-        handleSelectOption(props.option);
-      }}
-      className={cn(valueIsSelected(props, props.option) && "")}
-      data-checked={valueIsSelected(props, props.option)}
-      aria-checked={valueIsSelected(props, props.option)}
-    >
-      {props.option.label}
-    </CommandItem>
+    <span id={props.id} className={selectedClassNames}>
+      {props.value.label}
+    </span>
   );
 };
 
+/* ------------------------------- GroupHeader ------------------------------ */
+
+export const SelectGroupHeader = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  return <Header className={cn(selectVariants.header())}>{children}</Header>;
+};
+
+/* ---------------------------------- Group --------------------------------- */
+
+export const SelectGroup = ({ children }: { children: React.ReactNode }) => {
+  return <Section className={cn(selectVariants.group())}>{children}</Section>;
+};
+
+/* ---------------------------------- Item ---------------------------------- */
+
+export const SelectItem = <TValue,>(
+  props: SelectPropsWithoutRef<TValue> & {
+    option: SelectOption<TValue>;
+    id: string;
+  },
+) => {
+  return (
+    <ListBoxItem
+      id={props.id}
+      value={props.option.value as object}
+      className={cn(selectVariants.item())}
+    >
+      {props.option.label}
+    </ListBoxItem>
+  );
+};
+
+/* --------------------------------- Select --------------------------------- */
+
 const SelectInternal = <TValue,>({ ref, ...props }: SelectProps<TValue>) => {
   const { className, options, disabled, description } = props;
+
+  const formField = useFormFieldContext();
+  const labelId = useId();
+  const selectedValueId = useId();
+  const error = formField?.error?.message ?? props.errorMessage;
+  const { id, describedBy, descriptionId, errorId } = useCustomAriaIds({
+    errorOrErrorMessage: error,
+    description,
+  });
 
   const sortedOptions = useMemo(() => {
     const sorted = {
       ungrouped: [] as (SelectOption<TValue> & { id: number })[],
       grouped: {} as Record<string, (SelectOption<TValue> & { id: number })[]>,
+      all: [] as (SelectOption<TValue> & { id: number })[],
     };
 
+    let selected;
     options.forEach((option, id) => {
+      if (option == props.value) {
+        selected = id;
+      }
+
       if (option.group) {
         sorted.grouped[option.group] ??= [];
         sorted.grouped[option.group]!.push({
@@ -252,86 +253,102 @@ const SelectInternal = <TValue,>({ ref, ...props }: SelectProps<TValue>) => {
           id,
         });
       }
+
+      sorted.all.push({
+        ...option,
+        id,
+      });
     });
 
-    return sorted;
-  }, [options]);
-
-  const formField = useFormFieldContext();
-  const [isOpen, setIsOpen] = useState(false);
-  const [buttonRef, { width }] = useElementSize<HTMLButtonElement>();
-  const contentId = useId();
-  const error = formField?.error?.message ?? props.errorMessage;
-  const { id, describedBy, descriptionId, errorId } = useCustomAriaIds({
-    errorOrErrorMessage: error,
-    description,
-  });
+    return {
+      sorted,
+      selected,
+    };
+  }, [options, props.value]);
 
   return (
     <div className={cn(formVariants.wrapper(), className)}>
       <Label as="label" htmlFor={id}>
         {props.label}
       </Label>
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger asChild>
-          <button
-            disabled={disabled}
-            ref={buttonRef}
-            aria-expanded={isOpen}
-            aria-controls={contentId}
-            aria-describedby={describedBy}
-            className={cn(
-              formVariants.input.base(),
-              "flex items-center justify-between",
-              className,
-            )}
-          >
-            <span className="flex w-full items-center">
-              <ResetButton {...props} />
-              <Title {...props} />
+      <RaSelect
+        isDisabled={disabled}
+        ref={ref}
+        id={id}
+        aria-labelledby={labelId}
+        aria-describedby={describedBy}
+        selectedKey={sortedOptions.selected}
+        onSelectionChange={(key) => {
+          if (!props.onChange) return;
+          const selected = sortedOptions.sorted.all.find(
+            (option) => option.id == key,
+          );
+
+          if (!selected) {
+            throw new Error("Selected option not found");
+          }
+
+          const { id: _id, ...selectedValue } = selected;
+          props.onChange(selectedValue);
+        }}
+      >
+        <Button
+          className={cn(
+            formVariants.input.base(),
+            "flex items-center justify-between",
+            className,
+          )}
+          aria-labelledby={selectedValueId}
+        >
+          <span className="flex w-full items-center justify-between gap-1">
+            <span className="shrink-0">
+              <SelectResetButton {...props} />
+              <SelectSelectedValue id={selectedValueId} {...props} />
             </span>
-          </button>
-        </PopoverTrigger>
-        <PopoverPortal>
-          <PopoverContent
-            id={contentId}
-            style={{ width }}
-            className={cn(popoverVariants.root({ className }), "mt-1")}
-            ref={ref}
-          >
-            <Command className="p-0" aria-multiselectable={props.multi}>
-              <Input {...props} />
-              <CommandList>
-                <Empty {...props} />
-                <CommandGroup className="p-0">
-                  {sortedOptions.ungrouped.map((option) => (
-                    <Item
+            <span>
+              <ChevronsUpDown
+                aria-hidden="true"
+                className="h-4 w-4 text-muted-foreground"
+              />
+            </span>
+          </span>
+        </Button>
+        <Popover
+          className={cn(
+            popoverVariants.root(),
+            "w-[var(--trigger-width)]",
+            className,
+          )}
+        >
+          <ListBox className="flex h-full w-full flex-col overflow-hidden rounded-md bg-white">
+            <SelectGroup>
+              {sortedOptions.sorted.ungrouped.map((option) => (
+                <SelectItem
+                  id={option.id.toString()}
+                  key={option.id}
+                  option={option}
+                  {...props}
+                />
+              ))}
+            </SelectGroup>
+            {Object.entries(sortedOptions.sorted.grouped).map(
+              ([group, options]) => (
+                <SelectGroup key={group}>
+                  <SelectGroupHeader>{group}</SelectGroupHeader>
+                  {options.map((option) => (
+                    <SelectItem
+                      id={option.id.toString()}
                       key={option.id}
-                      setIsOpen={setIsOpen}
                       option={option}
                       {...props}
                     />
                   ))}
-                </CommandGroup>
-                {Object.entries(sortedOptions.grouped).map(
-                  ([group, options]) => (
-                    <CommandGroup key={group} heading={group}>
-                      {options.map((option) => (
-                        <Item
-                          key={option.id}
-                          setIsOpen={setIsOpen}
-                          option={option}
-                          {...props}
-                        />
-                      ))}
-                    </CommandGroup>
-                  ),
-                )}
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </PopoverPortal>
-      </Popover>
+                </SelectGroup>
+              ),
+            )}
+          </ListBox>
+        </Popover>
+      </RaSelect>
       <Description id={descriptionId} aria-hidden="true">
         {description}
       </Description>

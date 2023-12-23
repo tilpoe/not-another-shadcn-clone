@@ -42,8 +42,8 @@ function useButtonContext() {
 
 export const buttonVariants = cva({
   base: cn(
-    "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+    "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors",
+    "focus-visible:outline-none",
     "disabled:pointer-events-none disabled:opacity-50",
   ),
   variants: {
@@ -144,6 +144,9 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {
   children?: React.ReactNode;
   isLoading?: boolean;
+  /**
+   * @deprecated use `onPress` instead. onClick is only defined for compatibility with third party libraries.
+   */
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   onPointerDown?: React.PointerEventHandler<HTMLButtonElement>;
 }
@@ -218,6 +221,7 @@ export const Button = autoRef(({ ref, ...props }: ButtonProps) => {
         }}
         disabled={isLoading || isDisabled}
         type={props.form !== undefined ? "submit" : type}
+        form={props.form}
         ref={ref}
       >
         <>
@@ -246,13 +250,17 @@ export const ButtonIcon = ({
   if (isLoading) {
     return (
       <Loader2
+        aria-hidden="true"
         className={cn("h-4 w-4 animate-spin", !isIconOnly && "mr-2", className)}
       />
     );
   }
 
   return (
-    <Slot className={cn("h-4 w-4", !isIconOnly && "mr-2", className)}>
+    <Slot
+      className={cn("h-4 w-4", !isIconOnly && "mr-2", className)}
+      aria-hidden="true"
+    >
       {icon}
     </Slot>
   );
@@ -264,7 +272,7 @@ export const ButtonLoader = ({ show }: { show?: boolean }) => {
   const { isLoading } = useButtonContext();
 
   if (isLoading ?? show) {
-    return <Loader2 className="mr-2 h-4 w-4 animate-spin" />;
+    return <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />;
   }
 
   return null;

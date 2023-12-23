@@ -6,20 +6,29 @@ description: "A better way to manage your next actions"
 <Typography type="blockquote">
   This is a forked version of the next-safe-action package. <br />
   See original source here: https://github.com/TheEdoRan/next-safe-action <br />
-  The original package is licensed under the MIT license.
+  The original package is licensed under the MIT license. <br />
+  Current supported version: <b>5.2.1</b>
 </Typography>
 
 ## Installation
 
 <Steps>
 
-<Step>Create lib/actions/shared.ts</Step>
+<Step>Create `lib/actions/hook.ts`</Step>
 
-<ComponentSource name="actions/shared.ts" type="lib" />
+<ComponentSource name="actions/hook.ts" type="lib" />
 
-<Step>Create lib/actions/index.ts</Step>
+<Step>Create `lib/actions/index.ts`</Step>
 
 <ComponentSource name="actions/index.ts" type="lib" />
+
+<Step>Create `lib/actions/utils.ts`</Step>
+
+<ComponentSource name="actions/utils.ts" type="lib" />
+
+<Step>Create action client in `lib/actions/action.ts`</Step>
+
+<ComponentSource name="actions/action.ts" type="lib" />
 
 </Steps>
 

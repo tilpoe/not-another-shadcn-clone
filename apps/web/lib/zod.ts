@@ -79,41 +79,19 @@ function nullificate(value: string) {
   return value;
 }
 
-/**
- * Returns a Zod object schema for a select option with a label, data, and optional disabled flag.
- * @param dataSchema The Zod schema for the data property of the select option.
- * @param args An optional object containing arguments for the schema.
- * @param args.required The error message to display if the label property is missing.
- * @returns A Zod object schema for a select option.
- */
 function selectOption<TSchema extends z.ZodType>(
-  dataSchema: TSchema,
-  args?: {
-    required?: string;
-  },
+  valueSchema: TSchema,
+  params?: z.RawCreateParams,
 ) {
-  const object = z
-    .object({
+  return z.object(
+    {
       label: z.string(),
-      value: dataSchema,
+      value: valueSchema,
       disabled: z.boolean().optional(),
       group: z.string().optional(),
-    })
-    .nullable()
-    .refine(
-      (value) => {
-        if (args?.required) {
-          return value !== null && value.label !== "";
-        }
-
-        return true;
-      },
-      {
-        message: args?.required ?? "Choose an option",
-      },
-    );
-
-  return object;
+    },
+    params,
+  );
 }
 
 function selectOptions<TSchema extends z.ZodType>(

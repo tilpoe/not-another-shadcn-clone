@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { allDocs } from "contentlayer/generated";
@@ -6,7 +7,10 @@ import { Balancer } from "react-wrap-balancer";
 
 import { Alert, AlertDescription, AlertTitle } from "@/collection/ui/alert";
 import { badgeVariants } from "@/collection/ui/badge";
+import { ScrollArea } from "@/collection/ui/scroll-area";
 import { Mdx } from "@/components/mdx-components";
+import { DashboardTableOfContents } from "@/components/table-of-contents";
+import { getTableOfContents } from "@/lib/toc";
 import { cn } from "@/lib/utils";
 
 interface DocPageProps {
@@ -26,6 +30,8 @@ export default async function Page({ params }: DocPageProps) {
   if (!doc) {
     notFound();
   }
+
+  const toc = await getTableOfContents(doc.body.raw);
 
   return (
     <main className="relative py-6 lg:gap-10 lg:py-8 xl:grid xl:grid-cols-[1fr_300px]">
@@ -50,7 +56,7 @@ export default async function Page({ params }: DocPageProps) {
         {doc.api && (
           <div className="flex items-center space-x-2 pt-4">
             <Link
-              href={doc.api}
+              href={doc.api as Route}
               target="_blank"
               rel="noreferrer"
               className={cn(badgeVariants({ intent: "secondary" }))}
@@ -84,6 +90,18 @@ export default async function Page({ params }: DocPageProps) {
           <Mdx code={doc.body.code} />
         </div>
       </div>
+      {doc.toc && (
+        <div className="hidden text-sm xl:block">
+          <div className="sticky top-16 -mt-10 pt-4">
+            <ScrollArea className="pb-10">
+              <div className="sticky top-16 -mt-10 h-[calc(100vh-3.5rem)] py-12">
+                {/*    <DashboardTableOfContents toc={toc} /> */}
+                <DashboardTableOfContents toc={toc} />
+              </div>
+            </ScrollArea>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

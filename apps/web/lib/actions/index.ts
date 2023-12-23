@@ -4,20 +4,100 @@
  * The original package is licensed under the MIT license.
  */
 
+import { isNotFoundError } from "next/dist/client/components/not-found";
+import { isRedirectError } from "next/dist/client/components/redirect";
 import type { z } from "zod";
 
-import type {
-  MaybePromise,
-  SafeAction,
-  ServerCode,
-} from "@/lib/actions/shared";
 import {
   BetterActionError,
   DEFAULT_SERVER_ERROR,
   isError,
-  isNextNotFoundError,
-  isNextRedirectError,
-} from "@/lib/actions/shared";
+} from "@/lib/actions/utils";
+
+/* -------------------------------------------------------------------------- */
+/*                                    TYPES                                   */
+/* -------------------------------------------------------------------------- */
+/**
+ * Type of the function called from Client Components with typesafe input data.
+ */
+export type SafeAction<
+  Schema extends z.ZodTypeAny,
+  Data,
+  BetterActionErrors extends readonly string[],
+> = (input: z.input<Schema>) => Promise<{
+  data?: Data;
+  serverError?: string;
+  validationError?: Partial<Record<keyof z.input<Schema> | "_root", string[]>>;
+  actionError?: BetterActionErrors[number];
+}>;
+
+/**
+ * Type of the function that executes server code when defining a new safe action.
+ */
+export type ServerCode<
+  Schema extends z.ZodTypeAny,
+  Data,
+  Context,
+  BetterActionErrors extends readonly string[],
+> = (options: {
+  input: z.infer<Schema>;
+  ctx: Context;
+  error: (e: BetterActionErrors[number]) => void;
+}) => Promise<Data>;
+
+// HOOKS
+
+/**
+ * Type of `result` object returned by `useAction` and `useOptimisticAction` hooks.
+ */
+export type HookResult<
+  Schema extends z.ZodTypeAny,
+  Data,
+  BetterActionErrors extends readonly string[],
+> = Awaited<ReturnType<SafeAction<Schema, Data, BetterActionErrors>>> & {
+  fetchError?: string;
+};
+
+/**
+ * Type of hooks callbacks. These are executed when action is in a specific state.
+ */
+export interface HookCallbacks<
+  Schema extends z.ZodTypeAny,
+  Data,
+  BetterActionErrors extends readonly string[],
+> {
+  onExecute?: (input: z.input<Schema>) => MaybePromise<void>;
+  onSuccess?: (
+    data: Data,
+    input: z.input<Schema>,
+    reset: () => void,
+  ) => MaybePromise<void>;
+  onError?: (
+    error: Omit<HookResult<Schema, Data, BetterActionErrors>, "data">,
+    input: z.input<Schema>,
+    reset: () => void,
+  ) => MaybePromise<void>;
+  onSettled?: (
+    result: HookResult<Schema, Data, BetterActionErrors>,
+    input: z.input<Schema>,
+    reset: () => void,
+  ) => MaybePromise<void>;
+}
+
+/**
+ * Type of the action status returned by `useAction` and `useOptimisticAction` hooks.
+ */
+export type HookActionStatus =
+  | "idle"
+  | "executing"
+  | "hasSucceeded"
+  | "hasErrored";
+
+export type MaybePromise<T> = Promise<T> | T;
+
+/* -------------------------------------------------------------------------- */
+/*                                    HOOKS                                   */
+/* -------------------------------------------------------------------------- */
 
 export const createBetterActionClient = <
   Context,
@@ -70,13 +150,13 @@ export const createBetterActionClient = <
         const parsedInput = await schema.safeParseAsync(clientInput);
 
         if (!parsedInput.success) {
-          const fieldErrors = parsedInput.error.flatten()
-            .fieldErrors as Partial<
-            Record<keyof z.input<typeof schema>, string[]>
-          >;
+          const { formErrors, fieldErrors } = parsedInput.error.flatten();
 
           return {
-            validationError: fieldErrors,
+            validationError: {
+              _root: formErrors.length ? formErrors : undefined,
+              ...fieldErrors,
+            } as Partial<Record<keyof z.input<Schema> | "_root", string[]>>,
           };
         }
 
@@ -102,7 +182,7 @@ export const createBetterActionClient = <
       } catch (e: unknown) {
         // next/navigation functions work by throwing an error that will be
         // processed internally by Next.js. So, in this case we need to rethrow it.
-        if (isNextRedirectError(e) || isNextNotFoundError(e)) {
+        if (isRedirectError(e) || isNotFoundError(e)) {
           throw e;
         }
 

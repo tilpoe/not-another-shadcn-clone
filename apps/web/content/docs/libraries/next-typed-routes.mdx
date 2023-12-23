@@ -1,0 +1,37 @@
+---
+title: Next.js Typed Routes
+description: Utils to complement Next.js' dynamic routes with TypeScript
+---
+
+## Installation
+
+<Steps>
+
+<Step>Add experimental typed routes to `next.config.js`.</Step>
+
+```js {3-5}
+/** @type {import("next").NextConfig} */
+const config = {
+  experimental: {
+    typedRoutes: true,
+  },
+};
+
+export default config;
+```
+
+<Step>Create lib/navigation/utils.ts</Step>
+
+<ComponentSource name="navigation/utils.ts" type="lib" />
+
+</Steps>
+
+## Optional
+
+### Parsers
+
+`lib/navigation/parser.ts`
+
+These functions and hooks can be used to validate the search and dynamic params of the URL, client side and server side.
+
+<ComponentSource name="navigation/parser.ts" type="lib" />

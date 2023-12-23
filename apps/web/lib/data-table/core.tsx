@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
+import { Loader2 } from "lucide-react";
+import type { SortDescriptor } from "react-aria-components";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
@@ -295,4 +297,39 @@ export const filterData = <
   }
 
   return null;
+};
+
+export const getDataTableProps = <
+  TAllKeys extends readonly string[],
+  TKeys extends TAllKeys[number],
+>(state: {
+  value: {
+    key: TKeys | undefined;
+    direction: SortingDirection;
+  };
+  set: (args: { key?: TKeys; direction?: SortingDirection }) => void;
+}): {
+  onSortChange: (descriptor: SortDescriptor) => void;
+  sortDescriptor: SortDescriptor;
+} => {
+  return {
+    onSortChange: (descriptor) => {
+      state.set({
+        key: descriptor.column as any,
+        direction: descriptor.direction === "ascending" ? "asc" : "desc",
+      });
+    },
+    sortDescriptor: {
+      column: state.value.key,
+      direction: state.value.direction === "asc" ? "ascending" : "descending",
+    },
+  };
+};
+
+export const renderEmptyState = (text: string, isPending?: boolean) => () => {
+  if (isPending) {
+    return <Loader2 className="h-6 w-full animate-spin" />;
+  }
+
+  return <>{text}</>;
 };

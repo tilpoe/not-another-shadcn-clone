@@ -1,9 +1,12 @@
 import type { BaseSyntheticEvent } from "react";
-import { useId } from "react";
+import { useId, useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type {
   ControllerRenderProps,
   DefaultValues,
+  FieldArray,
+  FieldArrayPath,
+  FieldArrayWithId,
   FieldErrors,
   FieldPath,
   FieldPathValue,
@@ -11,8 +14,12 @@ import type {
   SubmitErrorHandler,
   SubmitHandler,
   UseFormReturn as UseDefaultFormReturn,
+  UseFieldArrayProps,
 } from "react-hook-form";
-import { useForm as useReactHookForm } from "react-hook-form";
+import {
+  useFieldArray as useReactFieldArray,
+  useForm as useReactHookForm,
+} from "react-hook-form";
 import type { z } from "zod";
 
 /* -------------------------------------------------------------------------- */
@@ -44,6 +51,7 @@ export const transformToCheckboxFieldField = <
   return {
     ...(asDefaultValue ? { defaultSelected: value } : { isSelected: value }),
     ...{ onChange, name, ref, onBlur },
+    value: name,
   };
 };
 
@@ -94,6 +102,93 @@ export function useCustomAriaIds({
   };
 }
 
+type Key = string | number;
+
+export type FieldArrayWithIdAndKey<
+  TFieldValues extends FieldValues = FieldValues,
+  TFieldArrayName extends
+    FieldArrayPath<TFieldValues> = FieldArrayPath<TFieldValues>,
+  TKeyName extends string = "key",
+> = FieldArrayWithId<TFieldValues, TFieldArrayName, "id"> &
+  Record<TKeyName, Key>;
+
+export const useFieldArray = <
+  TFieldValues extends FieldValues = FieldValues,
+  TFieldArrayName extends
+    FieldArrayPath<TFieldValues> = FieldArrayPath<TFieldValues>,
+  TKeyName extends string = "id",
+>(
+  props: UseFieldArrayProps<TFieldValues, TFieldArrayName, TKeyName>,
+) => {
+  const fieldArray = useReactFieldArray(props);
+
+  const fields = useMemo(() => {
+    if (fieldArray.fields.length === 0)
+      return [] as FieldArrayWithIdAndKey<TFieldValues, TFieldArrayName>[];
+
+    const item = fieldArray.fields[0]!;
+    if (!("key" in item)) {
+      return fieldArray.fields.map((field) => ({
+        ...field,
+        // @ts-expect-error id is added from react-hook-form
+        key: field.id as string,
+      })) as FieldArrayWithIdAndKey<TFieldValues, TFieldArrayName>[];
+    }
+
+    return fieldArray.fields as FieldArrayWithIdAndKey<
+      TFieldValues,
+      TFieldArrayName
+    >[];
+  }, [fieldArray.fields]);
+
+  function insertBefore(
+    key: Key,
+    value:
+      | FieldArray<TFieldValues, TFieldArrayName>
+      | FieldArray<TFieldValues, TFieldArrayName>[],
+  ) {
+    let i = 0;
+    for (const item of fields) {
+      if (item.key == key) {
+        fieldArray.insert(i, value);
+        break;
+      }
+      i++;
+    }
+  }
+
+  function removeKeys(...keys: Key[]) {
+    let i = 0;
+    for (const item of fields) {
+      if (keys.includes(item.key)) {
+        fieldArray.remove(i);
+      }
+      i++;
+    }
+  }
+
+  function get(key: Key) {
+    return fields.find((item) => item.key == key);
+  }
+
+  function getDoubtless(key: Key) {
+    const value = get(key);
+    if (!value) {
+      throw new Error("Found no field with this key.");
+    }
+    return value;
+  }
+
+  return {
+    ...fieldArray,
+    fields,
+    insertBefore,
+    removeKeys,
+    getDoubtless,
+    get,
+  };
+};
+
 export interface FormOptions<TSchema extends z.ZodType> {
   id?: string;
   onSubmit?: (data: z.infer<TSchema>) => void | Promise<void>;
@@ -116,7 +211,7 @@ export type UseFormReturn<
     id: string;
     onSubmit: (e?: BaseSyntheticEvent | undefined) => Promise<void>;
   };
-  handleSubmit: (e?: BaseSyntheticEvent | undefined) => void;
+  handleSubmit: (e?: unknown) => void;
   safeWatch: <TFieldName extends FieldPath<TFieldValues>>(
     name: TFieldName,
     defaultValue?: FieldPathValue<TFieldValues, TFieldName>,
@@ -163,7 +258,7 @@ export const useForm = <TSchema extends z.ZodType>(
     return typeof value === "undefined" ? undefined : value;
   };
 
-  function handleSubmit(_e?: BaseSyntheticEvent | undefined) {
+  function handleSubmit(_e?: unknown) {
     void form.handleSubmit(onValid, onError)();
   }
 

@@ -7,7 +7,7 @@ export const useDialog = (options?: { onClose?: () => void }) => {
 
   return {
     props: {
-      open,
+      isOpen: open,
       onOpenChange: setOpen,
     },
     isOpen: open,
@@ -28,5 +28,15 @@ export const useDialogState = <DialogState extends string>() => {
     set: setState,
     state,
     is: (which: DialogState) => state === which,
+    getProps: (which: DialogState) => ({
+      isOpen: state === which,
+      onOpenChange: (open: boolean) => {
+        if (!open) {
+          setState(undefined);
+        } else {
+          setState(which);
+        }
+      },
+    }),
   };
 };

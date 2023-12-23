@@ -38,6 +38,8 @@ export interface UnistNode extends Node {
     value?: unknown;
   }[];
   children?: UnistNode[];
+  __rawString__?: string;
+  __src__?: unknown;
 }
 
 export interface UnistTree extends Node {

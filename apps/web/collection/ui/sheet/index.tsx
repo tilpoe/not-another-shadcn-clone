@@ -6,6 +6,7 @@ import type { ModalRenderProps } from "react-aria-components";
 import {
   Dialog,
   DialogTrigger,
+  Heading,
   Modal,
   ModalOverlay,
 } from "react-aria-components";
@@ -20,6 +21,7 @@ import { autoRef, cn, withRenderProps } from "@/lib/utils";
 export const sheetVariants = {
   root: cva({
     base: cn(
+      "tp-sheet-base",
       "fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out",
       "s-entering:animate-in s-exiting:animate-out s-entering:duration-300 s-exiting:duration-500",
     ),
@@ -52,24 +54,29 @@ export const SheetTrigger = DialogTrigger;
 
 /* ---------------------------------- Root ---------------------------------- */
 
-export type SheetProps = Omit<
-  React.ComponentPropsWithRef<typeof Modal>,
-  "children"
-> &
-  VariantProps<typeof dialogVariants.root> & {
-    children?:
-      | React.ReactNode
-      | ((values: ModalRenderProps & { close: () => void }) => React.ReactNode);
-  };
+export interface SheetProps
+  extends Omit<React.ComponentPropsWithRef<typeof Modal>, "children">,
+    VariantProps<typeof sheetVariants.root> {
+  children?:
+    | React.ReactNode
+    | ((values: ModalRenderProps & { close: () => void }) => React.ReactNode);
+  blurBackground?: boolean;
+}
 
 export const Sheet = autoRef(
-  ({ className, children, isDismissable = true, ...props }: SheetProps) => {
+  ({
+    className,
+    children,
+    isDismissable = true,
+    side,
+    ...props
+  }: SheetProps) => {
     return (
       <>
         <ModalOverlay className={sheetVariants.overlay()} />
         <Modal
           isDismissable={isDismissable}
-          className={cn(sheetVariants.root(), className)}
+          className={cn(sheetVariants.root({ side }), className)}
           {...props}
         >
           {(modalValues) => (
@@ -83,4 +90,64 @@ export const Sheet = autoRef(
       </>
     );
   },
+);
+
+/* --------------------------------- Header --------------------------------- */
+
+export type SheetHeaderProps = React.ComponentPropsWithRef<"div">;
+
+export const SheetHeader = autoRef(
+  ({ className, ...props }: SheetHeaderProps) => (
+    <div
+      className={cn(
+        "flex flex-col space-y-2 text-center sm:text-left",
+        className,
+      )}
+      {...props}
+    />
+  ),
+);
+
+/* --------------------------------- Footer --------------------------------- */
+
+export type SheetFooterProps = React.ComponentPropsWithRef<"div">;
+
+export const SheetFooter = autoRef(
+  ({ className, ...props }: SheetFooterProps) => (
+    <div
+      className={cn(
+        "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+        className,
+      )}
+      {...props}
+    />
+  ),
+);
+
+/* ---------------------------------- Title --------------------------------- */
+
+export type SheetTitleProps = React.ComponentPropsWithRef<typeof Heading>;
+
+export const SheetTitle = autoRef(
+  ({ className, ...props }: SheetTitleProps) => (
+    <Heading
+      slot="title"
+      className={cn("text-lg font-semibold text-foreground", className)}
+      {...props}
+    />
+  ),
+);
+
+/* ------------------------------- Description ------------------------------- */
+
+export type SheetDescriptionProps = React.ComponentPropsWithRef<"p">;
+
+export const SheetDescription = autoRef(
+  ({ className, ...props }: SheetDescriptionProps) => (
+    <p
+      slot="description"
+      className={cn("text-sm text-muted-foreground", className)}
+      {...props}
+    />
+  ),
 );

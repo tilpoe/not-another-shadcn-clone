@@ -16,6 +16,9 @@ const config = {
   images: {
     domains: ["avatars.githubusercontent.com", "images.unsplash.com"],
   },
+  experimental: {
+    typedRoutes: true,
+  },
   webpack: (config) => {
     config.infrastructureLogging = {
       level: "error",

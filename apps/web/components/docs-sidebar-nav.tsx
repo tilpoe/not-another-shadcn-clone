@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -46,7 +47,7 @@ const DocsSidebarNavItems = ({
         item.href && !item.disabled ? (
           <Link
             key={index}
-            href={item.href}
+            href={item.href as Route}
             className={cn(
               "group flex w-full items-center rounded-md border border-transparent px-2 py-1",
               typeof item.title === "string" && "hover:underline",

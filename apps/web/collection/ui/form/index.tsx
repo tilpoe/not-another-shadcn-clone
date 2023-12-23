@@ -57,7 +57,7 @@ export const formVariants = {
   input: {
     base: cva({
       base: cn(
-        "flex w-full rounded-md border border-input  bg-background px-3 py-2 text-base",
+        "flex w-full rounded-md border border-input  bg-background px-3 py-2 text-base sm:text-sm text-foreground",
         "file:border-0 file:bg-transparent file:text-sm file:font-medium",
         "placeholder:text-sm placeholder:text-muted-foreground",
         "focus-visible:outline-none focus-visible:ring-0",
@@ -66,7 +66,7 @@ export const formVariants = {
       variants: {
         ring: {
           true: cn(
-            "rounded-md ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-ring",
+            "focus-visible:ring-primary focus-visible:ring-1 focus-visible:border-primary",
           ),
           false: "",
         },
@@ -82,9 +82,11 @@ export const formVariants = {
     }),
     ring: cva({
       base: cn(
-        "rounded-md ring-offset-background",
-        "data-[focused=true]:ring-2 data-[focused=true]:ring-offset-2",
-        "ring-ring data-[focus-within=true]:ring-2 data-[focus-within=true]:ring-offset-2",
+        "rounded-md",
+        "focus-visible:ring-primary focus-visible:ring-1 focus-visible:border-primary",
+        "s-focus-within:ring-primary s-focus-within:ring-1 s-focus-within:border-primary",
+        /*         "data-[focused=true]:ring-2 data-[focused=true]:ring-offset-2",
+        "ring-ring data-[focus-within=true]:ring-2 data-[focus-within=true]:ring-offset-2", */
       ),
     }),
   },

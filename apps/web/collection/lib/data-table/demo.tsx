@@ -11,15 +11,23 @@ import {
   CardTitle,
 } from "@/collection/ui/card";
 import { SearchField } from "@/collection/ui/search-field";
-import { Cell, Column, Row, Table, TBody, THead } from "@/collection/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@/collection/ui/table";
 import {
   createDataStore,
   defaultNumberSort,
   defaultStringSort,
   filterData,
+  getDataTableProps,
+  renderEmptyState,
 } from "@/lib/data-table/core";
 import { Paginator } from "@/lib/data-table/paginator";
-import { SortDataButton } from "@/lib/data-table/sort-data-button";
+import { TableSortingColumn } from "@/lib/data-table/table-sorting-column";
 
 /**
  * Mock data.
@@ -96,10 +104,6 @@ export default function Demo() {
   const rawStudents = useGetStudents();
   const students = useFilterStudents(rawStudents);
 
-  if (!students) {
-    return "No students found.";
-  }
-
   return (
     <div className="w-full">
       <Card>
@@ -118,28 +122,36 @@ export default function Demo() {
         </CardHeader>
         <CardContent className="max-h-[600px] overflow-auto p-0">
           <div>
-            <Table ariaLabel="students" stickyHeader>
-              <THead>
-                <Column>
-                  <SortDataButton state={sorting} sortBy="id" text="ID" />
-                </Column>
-                <Column isRowHeader>
-                  <SortDataButton state={sorting} sortBy="name" text="Name" />
-                </Column>
-              </THead>
-              <TBody>
-                {students.result.data.map((student) => (
-                  <Row key={student.id}>
-                    <Cell>{student.id}</Cell>
-                    <Cell>{student.name}</Cell>
-                  </Row>
-                ))}
-              </TBody>
+            <Table
+              ariaLabel="students"
+              stickyHeader
+              {...getDataTableProps(sorting)}
+            >
+              <TableHead>
+                <TableSortingColumn
+                  state={sorting}
+                  sortBy="id"
+                  text="ID"
+                  isRowHeader
+                />
+                <TableSortingColumn state={sorting} sortBy="name" text="Name" />
+              </TableHead>
+              <TableBody
+                items={students?.result.data}
+                renderEmptyState={renderEmptyState("No students found.")}
+              >
+                {(item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{item.id}</TableCell>
+                    <TableCell>{item.name}</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
             </Table>
             <Paginator
               className="border-t"
               state={pagination}
-              total={students.result.total}
+              total={students?.result.total}
             />
           </div>
         </CardContent>

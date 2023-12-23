@@ -18,15 +18,13 @@ import { autoRef, cn } from "@/lib/utils";
 export const alertVariants = {
   root: cva({
     base: cn(
-      /*       "relative w-full rounded-lg border p-4",
-      "[&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg~*]:pl-7" */
-      "relative grid w-full grid-cols-[auto_1fr] items-start gap-4 rounded-lg border p-4",
+      "relative grid w-full grid-cols-[auto_1fr] items-start gap-3 rounded-lg border p-4",
     ),
     variants: {
       type: {
         default: "bg-background text-foreground",
         error: "border-destructive bg-destructive/10 text-destructive",
-        info: "border-sky-200 bg-sky-500/10 text-sky-900",
+        info: "border-sky-400 bg-sky-500/10 text-sky-900",
         warning: "border-orange-400 bg-orange-500/10 text-orange-800",
         success: "border-green-600 bg-green-500/10 text-green-900",
       },
@@ -36,7 +34,7 @@ export const alertVariants = {
     },
   }),
   title: cva({
-    base: "mb-1 h-5 font-medium leading-[1.25rem] tracking-tight",
+    base: "h-5 font-medium leading-[1.25rem] tracking-tight",
   }),
   description: cva({
     base: "text-sm [&_p]:leading-relaxed",
@@ -122,7 +120,7 @@ export const Alert = autoRef(
         {...props}
       >
         {Icon}
-        <div>{children}</div>
+        <div className="space-y-1">{children}</div>
       </div>
     );
   },

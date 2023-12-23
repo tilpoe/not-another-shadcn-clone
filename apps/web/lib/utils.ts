@@ -1,4 +1,4 @@
-import type { ForwardedRef, ReactElement } from "react";
+import type { ForwardedRef, ReactElement, SyntheticEvent } from "react";
 import { forwardRef } from "react";
 import type { ClassValue } from "clsx";
 import clsx from "clsx";
@@ -247,4 +247,31 @@ export function withRenderProps<
 ): (values: TRenderProps) => TReturn {
   return (values: TRenderProps) =>
     typeof prop === "function" ? prop(values) : prop;
+}
+
+export function transformToImageEvent(
+  e: SyntheticEvent<HTMLImageElement, Event>,
+) {
+  let width = 0;
+  let height = 0;
+
+  if ("naturalWidth" in e.target && typeof e.target.naturalWidth === "number") {
+    width = e.target.naturalWidth;
+  }
+
+  if (
+    "naturalHeight" in e.target &&
+    typeof e.target.naturalHeight === "number"
+  ) {
+    height = e.target.naturalHeight;
+  }
+
+  return {
+    ...e,
+    target: {
+      ...e.target,
+      width,
+      height,
+    },
+  };
 }

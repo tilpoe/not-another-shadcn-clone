@@ -72,13 +72,33 @@ export const docsNavigationConfig: DocsNavItems = [
         items: [],
       },
       {
+        title: "E-Mail",
+        href: "/docs/libraries/email",
+        items: [],
+      },
+      {
         title: <Obligatory>Form</Obligatory>,
         href: "/docs/libraries/form",
         items: [],
       },
       {
+        title: "Next.js Typed Routes",
+        href: "/docs/libraries/next-typed-routes",
+        items: [],
+      },
+      {
+        title: "PDF",
+        href: "/docs/libraries/pdf",
+        items: [],
+      },
+      {
         title: "Stream Response",
         href: "/docs/libraries/stream-response",
+        items: [],
+      },
+      {
+        title: "Toast",
+        href: "/docs/libraries/toast",
         items: [],
       },
       {
@@ -162,6 +182,11 @@ export const docsNavigationConfig: DocsNavItems = [
         items: [],
       },
       {
+        title: "Container",
+        href: "/docs/components/ui/container",
+        items: [],
+      },
+      {
         title: "Dialog",
         href: "/docs/components/ui/dialog",
         items: [],
@@ -177,6 +202,11 @@ export const docsNavigationConfig: DocsNavItems = [
         items: [],
       },
       {
+        title: "Loader",
+        href: "/docs/components/ui/loader",
+        items: [],
+      },
+      {
         title: "Meter",
         href: "/docs/components/ui/meter",
         items: [],
@@ -184,6 +214,11 @@ export const docsNavigationConfig: DocsNavItems = [
       {
         title: <FormComponent>Number Field</FormComponent>,
         href: "/docs/components/ui/number-field",
+        items: [],
+      },
+      {
+        title: "Page Utils",
+        href: "/docs/components/ui/page",
         items: [],
       },
       {

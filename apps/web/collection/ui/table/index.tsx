@@ -2,13 +2,18 @@
 
 import { createContext, useContext, useMemo } from "react";
 import { cva } from "cva";
+import type {
+  ColumnProps,
+  TableBodyProps as RaTableBodyProps,
+  RowProps,
+} from "react-aria-components";
 import {
   Cell as RaCell,
   Column as RaColumn,
   Row as RaRow,
   Table as RaTable,
+  TableBody as RaTableBody,
   TableHeader as RaTableHeader,
-  TableBody,
 } from "react-aria-components";
 
 import { autoRef, cn, withRenderProps } from "@/lib/utils";
@@ -38,14 +43,14 @@ function useTableContext() {
 /* -------------------------------------------------------------------------- */
 
 interface CellProps {
-  width?: number;
+  cellWidth?: number;
   align?: "left" | "center" | "right";
 }
 
-const getCellStyle = ({ width, align }: CellProps) => {
+const getCellStyle = ({ cellWidth, align }: CellProps) => {
   return {
     textAlign: align,
-    width: width ? `${width}%` : undefined,
+    width: cellWidth ? `${cellWidth}%` : undefined,
   };
 };
 
@@ -64,13 +69,13 @@ export const tableVariants = {
     base: "[&_tr]:border-b",
   }),
   body: cva({
-    base: "[&_tr:last-child]:border-0",
+    base: "[&_tr:last-child]:border-0 [&_tr_>_td:last-child]:s-empty:p-4 [&_tr_>_td:last-child]:s-empty:text-center s-empty:text-sm s-empty:text-muted-foreground",
   }),
   row: cva({
     base: "border-b transition-colors s-focus:outline-none",
   }),
   column: cva({
-    base: "text-left align-middle font-medium text-muted-foreground [&>[role=checkbox]]:translate-y-[2px] s-focus:outline-none",
+    base: "text-left align-middle font-medium text-muted-foreground [&>[role=checkbox]]:translate-y-[2px] s-focus:outline-none s-allows-sorting:cursor-pointer",
     variants: {
       stickyHeader: {
         true: "sticky top-0 z-50 bg-white drop-shadow",
@@ -148,19 +153,29 @@ export const Table = autoRef(
 
 /* ---------------------------------- Body ---------------------------------- */
 
-export type TBodyProps = React.ComponentPropsWithRef<typeof TableBody>;
+export type TableBodyProps<TData extends object> = RaTableBodyProps<TData> & {
+  ref?: React.ComponentPropsWithRef<typeof RaTableBody>["ref"];
+};
 
-export const TBody = autoRef(({ className, ...props }: TBodyProps) => {
+const TableBodyInteral = <TData extends object>({
+  className,
+  ...props
+}: TableBodyProps<TData>) => {
   return (
-    <TableBody className={cn(tableVariants.body(), className)} {...props} />
+    <RaTableBody<TData>
+      className={cn(tableVariants.body(), className)}
+      {...props}
+    />
   );
-});
+};
+
+export const TableBody = autoRef(TableBodyInteral);
 
 /* ---------------------------------- Head ---------------------------------- */
 
-export type THeadProps = React.ComponentPropsWithRef<typeof RaTableHeader>;
+export type TableHeadProps = React.ComponentPropsWithRef<typeof RaTableHeader>;
 
-export const THead = autoRef(({ className, ...props }: THeadProps) => {
+export const TableHead = autoRef(({ className, ...props }: TableHeadProps) => {
   return (
     <RaTableHeader
       className={cn(tableVariants.header(), className)}
@@ -171,41 +186,47 @@ export const THead = autoRef(({ className, ...props }: THeadProps) => {
 
 /* --------------------------------- Column --------------------------------- */
 
-export type ColumnProps = React.ComponentPropsWithRef<typeof RaColumn> &
-  CellProps & {
-    isResizer?: boolean;
-  };
+export interface TableColumnProps<TData extends object>
+  extends ColumnProps<TData>,
+    CellProps {
+  ref?: React.ComponentPropsWithRef<typeof RaColumn>["ref"];
+}
 
-export const Column = autoRef(
-  ({ className, width, align, ...props }: ColumnProps) => {
-    const { stickyHeader, headerSize } = useTableContext();
+const TableColumnInternal = <TData extends object>({
+  className,
+  cellWidth,
+  align,
+  ...props
+}: TableColumnProps<TData>) => {
+  const { stickyHeader, headerSize } = useTableContext();
 
-    return (
-      <RaColumn
-        className={cn(
-          tableVariants.cell({ size: headerSize }),
-          tableVariants.column({ stickyHeader }),
-          className,
-        )}
-        style={{
-          ...(stickyHeader && {
-            clipPath: "polygon(0 0, 100% 0, 100% 130%, 0 130%)",
-          }),
-          ...getCellStyle({ align, width }),
-        }}
-        {...props}
-      />
-    );
-  },
-);
+  return (
+    <RaColumn
+      className={cn(
+        tableVariants.cell({ size: headerSize }),
+        tableVariants.column({ stickyHeader }),
+        className,
+      )}
+      style={{
+        ...(stickyHeader && {
+          clipPath: "polygon(0 0, 100% 0, 100% 130%, 0 130%)",
+        }),
+        ...getCellStyle({ align, cellWidth }),
+      }}
+      {...props}
+    />
+  );
+};
+
+export const TableColumn = autoRef(TableColumnInternal);
 
 /* ---------------------------------- Cell ---------------------------------- */
 
 export type TableCellProps = React.ComponentPropsWithRef<typeof RaCell> &
   CellProps;
 
-export const Cell = autoRef(
-  ({ className, width, align, ...props }: TableCellProps) => {
+export const TableCell = autoRef(
+  ({ className, cellWidth, align, ...props }: TableCellProps) => {
     const { bodySize } = useTableContext();
 
     return (
@@ -216,7 +237,7 @@ export const Cell = autoRef(
             withRenderProps(className)(values),
           )
         }
-        style={getCellStyle({ width, align })}
+        style={getCellStyle({ cellWidth, align })}
         {...props}
       />
     );
@@ -225,8 +246,29 @@ export const Cell = autoRef(
 
 /* ----------------------------------- Row ---------------------------------- */
 
-export type TableRowProps = React.ComponentPropsWithRef<typeof RaRow>;
+export interface TableRowProps<TData extends object> extends RowProps<TData> {
+  ref?: React.ComponentPropsWithRef<typeof RaRow>["ref"];
+}
 
-export const Row = autoRef(({ className, ...props }: TableRowProps) => {
+const TableRowInternal = <TData extends object>({
+  className,
+  ...props
+}: TableRowProps<TData>) => {
   return <RaRow className={cn(tableVariants.row(), className)} {...props} />;
-});
+};
+
+export const TableRow = autoRef(TableRowInternal);
+
+/* ------------------------------- CellActions ------------------------------ */
+
+export type TableCellActionsProps = React.ComponentPropsWithRef<"div">;
+
+export const TableCellActions = ({
+  children,
+  className,
+}: {
+  children?: React.ReactNode;
+  className?: React.ReactNode;
+}) => {
+  return <div className={cn("flex justify-end", className)}>{children}</div>;
+};

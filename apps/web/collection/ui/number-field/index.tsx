@@ -47,16 +47,22 @@ export const NumberField = autoRef(
         {...props}
       >
         <Label>{label}</Label>
-        <Group className={cn("flex", formVariants.input.ring())}>
-          <Button slot="decrement" className="rounded-l-md border px-4">
+        <Group className={cn("group flex", formVariants.input.ring())}>
+          <Button
+            slot="decrement"
+            className="rounded-l-md border px-4 group-s-focus-within:border-y-primary group-s-focus-within:border-l-primary"
+          >
             -
           </Button>
           <Input
             placeholder={placeholder}
-            className="rounded-none border-x-0"
+            className="rounded-none border-x-0 group-s-focus-within:border-y-primary group-s-focus-within:border-l-primary"
             ring={false}
           />
-          <Button slot="increment" className="rounded-r-md border px-4">
+          <Button
+            slot="increment"
+            className="rounded-r-md border px-4 group-s-focus-within:border-y-primary group-s-focus-within:border-r-primary"
+          >
             +
           </Button>
         </Group>

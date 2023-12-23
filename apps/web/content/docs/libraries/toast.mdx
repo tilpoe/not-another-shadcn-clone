@@ -1,0 +1,48 @@
+---
+title: Toast
+description: How to do toasts.
+---
+
+## Installation
+
+<Steps>
+
+<Step>Install the following dependencies:</Step>
+
+```bash
+pnpm add zustand sonner
+```
+
+<Step>Add Component to base layout.</Step>
+
+```tsx {10-10}
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body className={GeistSans.className}>
+        {children}
+        <Toaster richColors />
+      </body>
+    </html>
+  );
+}
+```
+
+<Step>(Optional) Add util for default error message.</Step>
+
+```tsx title="lib/toast.ts"
+import { toast as showToast } from "sonner";
+
+export const toast = {
+  ...showToast,
+  error: (message = "Es ist ein Fehler aufgetreten.") => {
+    showToast.error(message);
+  },
+};
+```
+
+</Steps>

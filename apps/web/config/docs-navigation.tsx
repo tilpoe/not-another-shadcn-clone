@@ -192,6 +192,11 @@ export const docsNavigationConfig: DocsNavItems = [
         items: [],
       },
       {
+        title: "Drawer",
+        href: "/docs/components/ui/drawer",
+        items: [],
+      },
+      {
         title: "Dropdown Menu",
         href: "/docs/components/ui/dropdown-menu",
         items: [],

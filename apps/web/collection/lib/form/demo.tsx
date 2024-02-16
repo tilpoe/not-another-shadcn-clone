@@ -85,7 +85,7 @@ export default function Demo() {
         </Form>
       </CardContent>
       <CardFooter>
-        <Button onClick={form.handleSubmit}>Submit</Button>
+        <Button onPress={form.handleSubmit}>Submit</Button>
       </CardFooter>
     </Card>
   );

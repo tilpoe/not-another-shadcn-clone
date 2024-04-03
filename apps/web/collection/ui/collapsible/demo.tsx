@@ -3,7 +3,7 @@
 import * as React from "react";
 import { ChevronsUpDown } from "lucide-react";
 
-import { Button } from "@/collection/ui/button";
+import { Button } from "@/collection/ui/button-3";
 import {
   Collapsible,
   CollapsibleContent,

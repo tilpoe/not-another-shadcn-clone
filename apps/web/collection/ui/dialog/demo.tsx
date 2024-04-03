@@ -1,45 +1,33 @@
-"use client";
+import { DialogTrigger } from "react-aria-components";
 
-import { TextField } from "react-aria-components";
-
-import { Button, CloseDialogButton } from "@/collection/ui/button";
+import { Button } from "@/collection/ui/button";
 import {
+  CloseDialogButton,
   Dialog,
   DialogBody,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/collection/ui/dialog";
-import { Input, Label } from "@/collection/ui/form";
 
-export default function DialogDemo() {
+export default function Demo() {
   return (
     <DialogTrigger>
-      <Button variant="outline">Edit Profile</Button>
+      <Button>Click me!</Button>
       <Dialog>
         {({ close }) => (
           <>
             <DialogHeader>
-              <DialogTitle>Edit profile</DialogTitle>
+              <DialogTitle>This is a dialog</DialogTitle>
               <DialogDescription>
-                Make changes to your profile here. Click save when you&apos;re
-                done.
+                I am describing this dialog.
               </DialogDescription>
             </DialogHeader>
-            <DialogBody>
-              <TextField
-                defaultValue="Pablo Muerte"
-                className="grid grid-cols-4 items-center gap-4"
-              >
-                <Label>Name</Label>
-                <Input className="col-span-3" />
-              </TextField>
-            </DialogBody>
+            <DialogBody>Hi there! I am the content of the dialog.</DialogBody>
             <DialogFooter>
               <CloseDialogButton close={close} />
-              <Button>Save changes</Button>
+              <Button onPress={close}>Done!</Button>
             </DialogFooter>
           </>
         )}

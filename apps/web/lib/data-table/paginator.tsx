@@ -9,7 +9,7 @@ import {
   ChevronsRight,
 } from "lucide-react";
 
-import { Button } from "@/collection/ui/button";
+import { Button } from "@/collection/ui/button-3";
 import type { SelectOption, SelectOptions } from "@/collection/ui/select";
 import { Select } from "@/collection/ui/select";
 import type { PaginationLimit, PaginationState } from "@/lib/data-table/core";

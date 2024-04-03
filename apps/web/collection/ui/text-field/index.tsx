@@ -1,53 +1,72 @@
-"use client";
+import React from "react";
+import { TextField as RACTextField } from "react-aria-components";
+import { tv } from "tailwind-variants";
 
-import { TextField as RaTextField } from "react-aria-components";
-
-import type { FormComponentBaseProps } from "@/collection/ui/form";
+import type { FieldProps } from "@/collection/ui/field";
 import {
   Description,
-  formVariants,
+  FieldError,
   handleOnKeyDown,
   Input,
   Label,
-} from "@/collection/ui/form";
-import { FormError } from "@/lib/form";
-import { useFormFieldContext } from "@/lib/form/context";
-import { autoRef, cn, withRenderProps } from "@/lib/utils";
+  TextArea,
+} from "@/collection/ui/field";
+import { useFieldState } from "@/lib/form-v2";
+import { autoRef, composeClassName } from "@/lib/ui";
 
-export type TextFieldProps = FormComponentBaseProps &
-  React.ComponentPropsWithRef<typeof RaTextField> & {
-    placeholder?: string;
+/* export const textFieldInputVariants = tv({
+  base: "border rounded-md",
+  variants: {
+    isFocused: fieldBorderStyles.variants.isFocusWithin,
+    ...fieldBorderStyles.variants,
+  },
+}); */
+
+export const textFieldInputVariants = tv({
+  base: "border rounded-md outline-2",
+});
+
+export type TextFieldProps = FieldProps &
+  React.ComponentPropsWithRef<typeof RACTextField> & {
+    multiline?:
+      | {
+          rows?: number;
+        }
+      | true;
   };
 
 export const TextField = autoRef(
   ({
-    onKeyDown,
-    onPressEnter,
     label,
     description,
-    errorMessage,
-    className,
-    isInvalid,
     placeholder,
-    id,
+    errorMessage,
+    onPressEnter,
+    multiline,
     ...props
   }: TextFieldProps) => {
-    const formField = useFormFieldContext();
+    const fieldState = useFieldState();
 
     return (
-      <RaTextField
-        onKeyDown={handleOnKeyDown(onKeyDown, onPressEnter)}
-        className={(values) =>
-          cn(formVariants.wrapper(), withRenderProps(className)(values))
-        }
-        isInvalid={formField?.invalid ?? isInvalid}
+      <RACTextField
         {...props}
+        className={composeClassName(props.className, "grid gap-y-1")}
+        onKeyDown={handleOnKeyDown(props.onKeyDown, onPressEnter)}
+        isInvalid={fieldState?.invalid ?? props.isInvalid}
       >
         <Label>{label}</Label>
-        <Input id={id} placeholder={placeholder} />
+        {multiline ? (
+          <TextArea
+            placeholder={placeholder}
+            className={textFieldInputVariants}
+            rows={typeof multiline === "object" ? multiline.rows : undefined}
+          />
+        ) : (
+          <Input placeholder={placeholder} className={textFieldInputVariants} />
+        )}
         <Description>{description}</Description>
-        <FormError>{errorMessage}</FormError>
-      </RaTextField>
+        <FieldError>{fieldState?.error?.message ?? errorMessage}</FieldError>
+      </RACTextField>
     );
   },
 );

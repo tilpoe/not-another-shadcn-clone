@@ -7,7 +7,7 @@
 import * as React from "react";
 import { Loader2 } from "lucide-react";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/collection/ui/tabs";
+import { Tab, TabList, TabPanel, Tabs } from "@/collection/ui/tabs";
 import { CopyButton, CopyWithClassNames } from "@/components/copy-button";
 import { cn } from "@/lib/utils";
 
@@ -64,30 +64,16 @@ export function ComponentPreview({
       className={cn("group relative mt-4 flex flex-col space-y-2", className)}
       {...props}
     >
-      <Tabs defaultValue="preview" className="relative mr-auto w-full">
-        <TabsList className="flex h-full w-full justify-start gap-2 rounded-md bg-transparent py-2">
-          <TabsTrigger
-            value="preview"
-            className={cn(
-              "relative h-9 bg-transparent p-4 font-semibold text-muted-foreground shadow-none transition-all transition-none before:transition-all data-[state=active]:text-primary-foreground data-[state=active]:shadow-none",
-              "before:absolute before:inset-0 before:bottom-0 before:hidden before:h-full before:rounded-full before:bg-primary before:content-[''] data-[state=active]:before:block",
-              "data-[state=inactive]:hover:before:block data-[state=inactive]:hover:before:border data-[state=inactive]:hover:before:bg-transparent",
-            )}
-          >
+      <Tabs defaultSelectedKey="preview" className="relative mr-auto w-full">
+        <TabList className="flex h-full w-full justify-start gap-2 rounded-md bg-transparent py-2">
+          <Tab id="preview">
             <span className="z-20">Preview</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="code"
-            className={cn(
-              "relative h-9 rounded-none border-b-transparent bg-transparent p-4 font-semibold text-muted-foreground shadow-none transition-all transition-none before:transition-all data-[state=active]:text-primary-foreground data-[state=active]:shadow-none",
-              "before:absolute before:inset-0 before:bottom-0 before:hidden before:h-full before:rounded-full before:bg-primary before:content-[''] data-[state=active]:before:block",
-              "data-[state=inactive]:hover:before:block data-[state=inactive]:hover:before:border data-[state=inactive]:hover:before:bg-transparent",
-            )}
-          >
+          </Tab>
+          <Tab id="code">
             <span className="z-20">Code</span>
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="preview" className="relative rounded-md border">
+          </Tab>
+        </TabList>
+        <TabPanel id="preview" className="relative rounded-md border">
           <div className="flex items-center justify-between p-4">
             {extractedClassNames ? (
               <CopyWithClassNames
@@ -119,14 +105,14 @@ export function ComponentPreview({
               {Preview}
             </React.Suspense>
           </div>
-        </TabsContent>
-        <TabsContent value="code">
+        </TabPanel>
+        <TabPanel id="code">
           <div className="flex flex-col space-y-4">
             <div className="w-full rounded-md [&_pre]:my-0 [&_pre]:max-h-[350px] [&_pre]:overflow-auto">
               {Code}
             </div>
           </div>
-        </TabsContent>
+        </TabPanel>
       </Tabs>
     </div>
   );

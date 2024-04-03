@@ -1,16 +1,72 @@
 "use client";
 
-import Link from "next/link";
 import type { VariantProps } from "cva";
-import { cva } from "cva";
-import { ArrowLeft } from "lucide-react";
+import { tv } from "tailwind-variants";
 
-import { buttonVariants } from "@/collection/ui/button";
-import { Container, ContainerInner } from "@/collection/ui/container";
-import type { NextRoute } from "@/lib/navigation/utils";
 import { cn } from "@/lib/utils";
 
-const barVariants = cva({
+/* -------------------------------------------------------------------------- */
+/*                                  Container                                 */
+/* -------------------------------------------------------------------------- */
+
+const containerVariants = tv({
+  base: "flex w-full items-center justify-center px-6 -sm:px-4",
+  variants: {
+    fitToScroll: {
+      true: "grow overflow-scroll",
+    },
+  },
+  defaultVariants: {
+    fitToScroll: false,
+  },
+});
+
+export const Container = ({
+  children,
+  className,
+  fitToScroll,
+}: {
+  children?: React.ReactNode;
+  className?: string;
+} & VariantProps<typeof containerVariants>) => {
+  return (
+    <div className={cn(containerVariants({ fitToScroll }), className)}>
+      {children}
+    </div>
+  );
+};
+
+const containerInnerVariants = tv({
+  base: "h-full w-full max-w-6xl grow space-y-4",
+  variants: {
+    width: {
+      default: "max-w-7xl",
+      lg: "max-w-8xl",
+      xl: "max-w-[90rem]",
+      max: "max-w-[2000px]",
+    },
+  },
+  defaultVariants: {
+    width: "default",
+  },
+});
+
+export const ContainerInner = ({
+  children,
+  className,
+  width,
+}: {
+  children?: React.ReactNode;
+  className?: string;
+} & VariantProps<typeof containerInnerVariants>) => {
+  return (
+    <div className={cn(containerInnerVariants({ width }), className)}>
+      {children}
+    </div>
+  );
+};
+
+const barVariants = tv({
   base: "z-50",
   variants: {
     padding: {
@@ -34,6 +90,10 @@ const barVariants = cva({
     shadow: false,
   },
 });
+
+/* -------------------------------------------------------------------------- */
+/*                                     Bar                                    */
+/* -------------------------------------------------------------------------- */
 
 export const PageBar = ({
   children,
@@ -76,27 +136,6 @@ export const PageBarRight = ({
   className?: string;
 }) => {
   return <div className={cn("flex justify-end", className)}>{children}</div>;
-};
-
-export const BackButton = <TRoute,>({
-  className,
-  href,
-}: {
-  className?: string;
-  href: NextRoute<TRoute>;
-}) => {
-  return (
-    <Link
-      href={href}
-      className={cn(
-        buttonVariants({ variant: "ghost", icon: true }),
-        "mr-2",
-        className,
-      )}
-    >
-      <ArrowLeft />
-    </Link>
-  );
 };
 
 export const PageTitle = ({ children }: { children: React.ReactNode }) => {

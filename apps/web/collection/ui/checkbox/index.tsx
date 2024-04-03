@@ -1,44 +1,16 @@
 "use client";
 
-import { cva } from "cva";
-import { Checkbox as RaCheckbox } from "react-aria-components";
+import { Slot } from "@radix-ui/react-slot";
+import { CheckIcon, MinusIcon } from "lucide-react";
+import { Checkbox as RACCheckbox } from "react-aria-components";
 
-import type { FormComponentBaseProps } from "@/collection/ui/form";
-import { Description, ErrorMessage, Label } from "@/collection/ui/form";
-import { useFormFieldContext } from "@/lib/form/context";
-import { useCustomAriaIds } from "@/lib/form/utils";
-import { autoRef, cn, withRenderProps } from "@/lib/utils";
+import type { FieldProps } from "@/collection/ui/field";
+import { Description, FieldError, Label } from "@/collection/ui/field";
+import { useCustomAriaIds, useFieldState } from "@/lib/form-v2";
+import { autoRef, cn, composeClassName, formWrapperVariants } from "@/lib/ui";
 
-/* -------------------------------------------------------------------------- */
-/*                                  Variants                                  */
-/* -------------------------------------------------------------------------- */
-
-export const checkboxVariants = {
-  root: cva({
-    base: cn(
-      "group/wrapper s-disabled:opacity-60 grid grid-cols-[auto_1fr] items-center gap-x-2 text-sm",
-    ),
-  }),
-  indicatorWrapper: cva({
-    base: cn(
-      "flex h-4 w-4 items-center justify-center rounded border border-input transition-all",
-      "group-s-selected/wrapper:bg-primary group-s-selected/wrapper:border-primary",
-    ),
-  }),
-  indicator: cva({
-    base: cn(
-      "h-3 w-3 fill-none stroke-primary stroke-[2px] transition-all [stroke-dasharray:22px] [stroke-dashoffset:66]",
-      "group-s-selected/wrapper:[stroke-dashoffset:43] group-s-selected/wrapper:stroke-primary-foreground",
-    ),
-  }),
-};
-
-/* -------------------------------------------------------------------------- */
-/*                                 Components                                 */
-/* -------------------------------------------------------------------------- */
-
-export type CheckboxProps = FormComponentBaseProps &
-  React.ComponentPropsWithRef<typeof RaCheckbox>;
+export type CheckboxProps = Omit<FieldProps, "onPressEnter" | "placeholder"> &
+  React.ComponentPropsWithRef<typeof RACCheckbox>;
 
 export const Checkbox = autoRef(
   ({
@@ -49,36 +21,40 @@ export const Checkbox = autoRef(
     isInvalid,
     ...props
   }: CheckboxProps) => {
-    const formField = useFormFieldContext();
+    const fieldState = useFieldState();
 
     const { descriptionId, errorId, describedBy, error } = useCustomAriaIds({
-      errorOrErrorMessage: formField?.error?.message ?? errorMessage,
+      errorOrErrorMessage: fieldState?.error?.message ?? errorMessage,
       description,
     });
 
     return (
-      <RaCheckbox
-        isInvalid={formField?.invalid ?? isInvalid}
-        className={(values) =>
-          cn(checkboxVariants.root(), withRenderProps(className)(values))
-        }
+      <RACCheckbox
+        isInvalid={fieldState?.invalid ?? isInvalid}
+        className={composeClassName(className, (className) =>
+          cn(
+            formWrapperVariants(),
+            "group/root grid-cols-[auto_1fr] items-center gap-x-2 disabled:opacity-50",
+            className,
+          ),
+        )}
         aria-describedby={describedBy}
         {...props}
       >
         {({ isIndeterminate }) => (
           <>
-            <div className={checkboxVariants.indicatorWrapper()}>
-              <svg
-                viewBox="0 0 18 18"
+            <div
+              className={cn(
+                "flex h-4 w-4 items-center justify-center rounded border border-input transition-all",
+                "group-selected/root:border-primary group-selected/root:bg-primary",
+              )}
+            >
+              <Slot
+                className="group-selected/root:stroke-white h-3 w-3 fill-none stroke-transparent stroke-[3px]"
                 aria-hidden="true"
-                className={checkboxVariants.indicator()}
               >
-                {isIndeterminate ? (
-                  <rect x={1} y={7.5} width={15} height={3} />
-                ) : (
-                  <polyline points="1 9 7 14 15 4" />
-                )}
-              </svg>
+                {isIndeterminate ? <MinusIcon /> : <CheckIcon />}
+              </Slot>
             </div>
             <Label as="child">
               <span>{label}</span>
@@ -90,12 +66,12 @@ export const Checkbox = autoRef(
             >
               {description}
             </Description>
-            <ErrorMessage id={errorId} className={"col-start-2"}>
+            <FieldError id={errorId} className="col-start-2">
               {error}
-            </ErrorMessage>
+            </FieldError>
           </>
         )}
-      </RaCheckbox>
+      </RACCheckbox>
     );
   },
 );

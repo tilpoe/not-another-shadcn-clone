@@ -1,9 +1,9 @@
 import { BellRing, Check } from "lucide-react";
 
-import { Button } from "@/collection/ui/button";
+import { Button } from "@/collection/ui/button-3";
 import {
   Card,
-  CardContent,
+  CardBody,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -39,7 +39,7 @@ export default function CardDemo({ className, ...props }: CardProps) {
           <CardDescription>You have 3 unread messages.</CardDescription>
         </CardHeading>
       </CardHeader>
-      <CardContent className="grid gap-4">
+      <CardBody className="grid gap-4">
         <div className=" flex items-center space-x-4 rounded-md border p-4">
           <BellRing />
           <div className="flex-1 space-y-1">
@@ -70,7 +70,7 @@ export default function CardDemo({ className, ...props }: CardProps) {
             </div>
           ))}
         </div>
-      </CardContent>
+      </CardBody>
       <CardFooter>
         <Button className="w-full">
           <Check className="mr-2 h-4 w-4" /> Mark all as read

@@ -1,24 +1,22 @@
 "use client";
 
-import { Button, CloseDialogButton } from "@/collection/ui/button";
+import { DialogTrigger } from "react-aria-components";
+
+import { Button } from "@/collection/ui/button";
 import {
+  CloseDialogButton,
   Dialog,
   DialogBody,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/collection/ui/dialog";
-import { useDialog } from "@/lib/dialog-helpers";
 
 export default function Demo() {
-  const dialog = useDialog();
-
-  console.log(dialog.isOpen);
-
   return (
-    <>
-      <Button onPress={dialog.toggle}>Open Dialog</Button>
-      <Dialog {...dialog.props} className="h-full">
+    <DialogTrigger>
+      <Button>Open Dialog</Button>
+      <Dialog classNames={{ root: "h-full" }}>
         {({ close }) => (
           <>
             <DialogHeader>
@@ -39,6 +37,6 @@ export default function Demo() {
           </>
         )}
       </Dialog>
-    </>
+    </DialogTrigger>
   );
 }

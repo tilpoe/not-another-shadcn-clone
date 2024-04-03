@@ -11,7 +11,7 @@ import {
   ModalOverlay,
 } from "react-aria-components";
 
-import { dialogVariants } from "@/collection/ui/dialog";
+import { dialogVariants } from "@/collection/ui/dialog-v2";
 import { autoRef, cn, withRenderProps } from "@/lib/utils";
 
 /* -------------------------------------------------------------------------- */

@@ -25,8 +25,8 @@ export const parseSearchParams = <
     redirectTo?: TRedirectTo;
   },
 ): TRedirectTo extends string
-  ? TSchema["_input"]
-  : TSchema["_input"] | null => {
+  ? TSchema["_output"]
+  : TSchema["_output"] | null => {
   const params = options.schema.safeParse(unparsedSearchParams);
 
   if (!params.success) {
@@ -38,7 +38,7 @@ export const parseSearchParams = <
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return params.data as TSchema["_input"];
+  return params.data as TSchema["_output"];
 };
 
 /* -------------------------------------------------------------------------- */

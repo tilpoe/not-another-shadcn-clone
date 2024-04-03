@@ -1,35 +1,35 @@
-import { TextField } from "react-aria-components";
+import { DialogTrigger } from "react-aria-components";
 
 import { Button } from "@/collection/ui/button";
-import { Label } from "@/collection/ui/form";
 import {
   Popover,
-  PopoverContent,
+  PopoverBody,
   PopoverDescription,
   PopoverHeader,
+  PopoverInner,
   PopoverTitle,
-  PopoverTrigger,
 } from "@/collection/ui/popover";
+import { TextField } from "@/collection/ui/text-field";
 
 export default function PopoverDemo() {
   return (
-    <PopoverTrigger>
-      <Button variant="outline">Open popover</Button>
+    <DialogTrigger>
+      <Button>Open popover</Button>
       <Popover>
-        <PopoverHeader>
-          <PopoverTitle>Dimensions</PopoverTitle>
-          <PopoverDescription>
-            Set the dimensions for the layer.
-          </PopoverDescription>
-        </PopoverHeader>
-        <PopoverContent>
-          <div className="grid gap-2">
-            <TextField className="grid grid-cols-3 items-center gap-4">
-              <Label>Width</Label>
-            </TextField>
-          </div>
-        </PopoverContent>
+        <PopoverInner>
+          <PopoverHeader>
+            <PopoverTitle>Dimensions</PopoverTitle>
+            <PopoverDescription>
+              Set the dimensions for the layer.
+            </PopoverDescription>
+          </PopoverHeader>
+          <PopoverBody>
+            <div className="grid gap-2">
+              <TextField label="Width" />
+            </div>
+          </PopoverBody>
+        </PopoverInner>
       </Popover>
-    </PopoverTrigger>
+    </DialogTrigger>
   );
 }

@@ -1,13 +1,13 @@
 "use client";
 
-import { Button, CloseDialogButton } from "@/collection/ui/button";
+import { Button, CloseDialogButton } from "@/collection/ui/button-3";
 import {
   Dialog,
   DialogBody,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/collection/ui/dialog";
+} from "@/collection/ui/dialog-v2";
 import {
   DropdownMenu,
   DropdownMenuContent,

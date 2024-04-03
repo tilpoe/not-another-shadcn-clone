@@ -2,14 +2,18 @@
 
 import { ChevronDown } from "lucide-react";
 
-import { Button, ButtonIcon, CloseDialogButton } from "@/collection/ui/button";
+import {
+  Button,
+  ButtonIcon,
+  CloseDialogButton,
+} from "@/collection/ui/button-3";
 import {
   Dialog,
   DialogBody,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/collection/ui/dialog";
+} from "@/collection/ui/dialog-v2";
 import {
   DropdownMenu,
   DropdownMenuContent,

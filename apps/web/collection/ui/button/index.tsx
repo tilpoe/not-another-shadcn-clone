@@ -1,83 +1,76 @@
 "use client";
 
-import React, { createContext, useContext, useMemo } from "react";
 import { Slot } from "@radix-ui/react-slot";
-import type { VariantProps } from "cva";
-import { cva } from "cva";
-import { Loader2 } from "lucide-react";
-import { useButton } from "react-aria";
-import type { Button as RaButton } from "react-aria-components";
-import {
-  ButtonContext as RaButtonContext,
-  useContextProps,
-} from "react-aria-components";
+import { Loader2Icon } from "lucide-react";
+import { Button as RACButton } from "react-aria-components";
+import type { VariantProps } from "tailwind-variants";
+import { tv } from "tailwind-variants";
 
-import { autoRef, cn } from "@/lib/utils";
+import { autoRef, cn, composeClassName, focusRing } from "@/lib/ui";
 
 /* -------------------------------------------------------------------------- */
-/*                                   Context                                  */
+/*                                   Button                                   */
 /* -------------------------------------------------------------------------- */
-
-interface ButtonContextType {
-  isLoading?: boolean;
-  iconOnly?: boolean;
-  size?: VariantProps<typeof buttonVariants>["size"];
-}
-
-const ButtonContext = createContext<ButtonContextType | null>(null);
-
-function useButtonContext() {
-  const context = useContext(ButtonContext);
-  if (!context) {
-    throw new Error("useButtonContext must be used within a <Button/>");
-  }
-  return context;
-}
-
-/* -------------------------------------------------------------------------- */
-/*                                 Components                                 */
-/* -------------------------------------------------------------------------- */
-
-/* ---------------------------------- Root ---------------------------------- */
-
-export const buttonVariants = cva({
+export const buttonVariants = tv({
+  extend: focusRing,
   base: cn(
-    "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors",
-    "focus-visible:outline-none",
+    "w-fit inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors gap-2",
+    "focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none focus-visible:ring-2",
     "disabled:pointer-events-none disabled:opacity-50",
   ),
   variants: {
     variant: {
       default: "",
-      secondary: "",
-      outline: "border bg-background",
+      outline: "border",
       ghost: "",
     },
     intent: {
-      default: "",
+      primary: "",
+      secondary: "",
       destructive: "",
     },
+    iconOnly: {
+      true: "!p-0",
+    },
     size: {
-      xs: "h-8 px-2 text-xs",
-      sm: "h-9 px-3",
       default: "h-10 px-3",
-      lg: "h-11 px-5",
-    },
-    icon: {
-      true: "",
-      false: "",
-    },
-    width: {
-      default: "inline-flex",
-      full: "flex w-full",
+      sm: "h-9 px-2.5",
+      lg: "h-11 px-3.5",
     },
   },
+  defaultVariants: {
+    variant: "default",
+    intent: "primary",
+    iconOnly: false,
+    size: "default",
+  },
   compoundVariants: [
+    // icon only sizes
+    {
+      iconOnly: true,
+      size: "default",
+      className: "w-10",
+    },
+    {
+      iconOnly: true,
+      size: "sm",
+      className: "w-9",
+    },
+    {
+      iconOnly: true,
+      size: "lg",
+      className: "w-11",
+    },
     // default variant
     {
       variant: "default",
-      intent: "default",
+      intent: "primary",
       className: "bg-primary text-primary-foreground hover:bg-primary/90",
+    },
+    {
+      variant: "default",
+      intent: "secondary",
+      className: "bg-secondary text-secondary-foreground hover:bg-secondary/90",
     },
     {
       variant: "default",
@@ -85,217 +78,191 @@ export const buttonVariants = cva({
       className:
         "bg-destructive text-destructive-foreground hover:bg-destructive/90",
     },
-    // secondary variant
-    {
-      variant: "secondary",
-      intent: "default",
-      className: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-    },
     // outline variant
     {
       variant: "outline",
-      intent: "default",
-      className: "border-input hover:bg-accent",
+      intent: "primary",
+      className: "border-primary text-primary hover:bg-primary/10",
+    },
+    {
+      variant: "outline",
+      intent: "secondary",
+      className: "border text-secondary-foreground hover:bg-secondary",
     },
     {
       variant: "outline",
       intent: "destructive",
-      className: "border-destructive text-destructive hover:bg-destructive/5",
+      className: "border-destructive text-destructive hover:bg-destructive/10",
     },
     // ghost variant
     {
       variant: "ghost",
-      intent: "default",
-      className: "hover:bg-accent",
+      intent: "primary",
+      className: "text-primary hover:bg-primary/10",
+    },
+    {
+      variant: "ghost",
+      intent: "secondary",
+      className: "text-secondary-foreground hover:bg-secondary",
     },
     {
       variant: "ghost",
       intent: "destructive",
       className: "text-destructive hover:bg-destructive/10",
     },
-    // icon only
-    {
-      size: "sm",
-      icon: true,
-      className: "h-9 w-9 p-2",
-    },
-    {
-      size: "default",
-      icon: true,
-      className: "h-10 w-10 px-0",
-    },
-    {
-      size: "lg",
-      icon: true,
-      className: "h-11 w-11 px-0",
-    },
   ],
+});
+
+export type ButtonVariantProps = VariantProps<typeof buttonVariants>;
+
+export type ButtonProps = Omit<
+  React.ComponentPropsWithRef<typeof RACButton>,
+  "children"
+> &
+  Omit<ButtonVariantProps, "variant" | "intent"> & {
+    classNames?: {
+      icon?: string;
+    };
+    variant?: `${Required<ButtonVariantProps>["variant"]}/${Required<ButtonVariantProps>["intent"]}`;
+    isLoading?: boolean;
+    /**
+     * @ignore use `onPress` instead. onClick is only defined for compatibility with third party libraries.
+     */
+    onClick?: React.MouseEventHandler<HTMLButtonElement>;
+    onPointerDown?: React.PointerEventHandler<HTMLButtonElement>;
+    children?: React.ReactElement | string;
+    prefix?: React.ReactElement;
+    suffix?: React.ReactElement;
+  };
+
+export const Button = autoRef(
+  ({
+    ref,
+    variant = `default/primary`,
+    isLoading,
+    children,
+    prefix,
+    suffix,
+    classNames,
+    size,
+    iconOnly,
+    ...props
+  }: ButtonProps) => {
+    // create button variants
+    const buttonStyle = variant.split("/") as [
+      Required<ButtonVariantProps>["variant"],
+      Required<ButtonVariantProps>["intent"],
+    ];
+
+    // have to use react-aria's useButton hook because of the way it handles press events
+    // if any third party library injects "onClick" or "onPointerDown" props (e.g. radix)
+    // it would not be propagated to the button
+    const { onPointerDown, onClick, ...sanitizedProps } = props;
+
+    return (
+      <RACButton
+        {...sanitizedProps}
+        className={composeClassName(props.className, (className, renderProps) =>
+          buttonVariants({
+            ...renderProps,
+            variant: buttonStyle[0],
+            intent: buttonStyle[1],
+            size,
+            iconOnly,
+            className,
+          }),
+        )}
+        onPress={(e) => {
+          if (onClick !== undefined) {
+            onClick(e as unknown as React.MouseEvent<HTMLButtonElement>);
+          }
+
+          if (onPointerDown !== undefined) {
+            onPointerDown(
+              e as unknown as React.PointerEvent<HTMLButtonElement>,
+            );
+          }
+
+          if (props.onPress !== undefined) {
+            props.onPress(e);
+          }
+        }}
+        isDisabled={isLoading || props.isDisabled}
+        type={props.form !== undefined ? "submit" : props.type}
+        ref={ref}
+      >
+        {prefix !== undefined && (
+          <ButtonIcon
+            size={size}
+            isLoading={isLoading}
+            className={classNames?.icon}
+          >
+            {prefix}
+          </ButtonIcon>
+        )}
+        {children !== undefined && (
+          <Slot className={cn(isLoading && "invisible")}>
+            {typeof children === "string" ? <span>{children}</span> : children}
+          </Slot>
+        )}
+        {suffix !== undefined && (
+          <ButtonIcon
+            size={size}
+            isLoading={isLoading}
+            className={classNames?.icon}
+          >
+            {suffix}
+          </ButtonIcon>
+        )}
+        {isLoading && (
+          <Loader2Icon
+            aria-hidden="true"
+            className={cn("absolute h-4 w-4 animate-spin")}
+          />
+        )}
+      </RACButton>
+    );
+  },
+);
+
+/* -------------------------------------------------------------------------- */
+/*                                    Icon                                    */
+/* -------------------------------------------------------------------------- */
+export const buttonIconVariants = tv({
+  variants: {
+    size: {
+      default: "h-4 w-4",
+      sm: "h-3.5 w-3.5",
+      lg: "h-5 w-5",
+    },
+  },
   defaultVariants: {
-    variant: "default",
-    intent: "default",
     size: "default",
-    width: "default",
-    icon: false,
   },
 });
 
-export interface ButtonProps
-  extends Omit<React.ComponentPropsWithRef<typeof RaButton>, "children">,
-    VariantProps<typeof buttonVariants> {
-  children?: React.ReactNode;
+type ButtonIconProps = {
   isLoading?: boolean;
-  /**
-   * @deprecated use `onPress` instead. onClick is only defined for compatibility with third party libraries.
-   */
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
-  onPointerDown?: React.PointerEventHandler<HTMLButtonElement>;
-}
-
-export const Button = autoRef(({ ref, ...props }: ButtonProps) => {
-  [props, ref] = useContextProps(props, ref!, RaButtonContext);
-
-  const {
-    children,
-    className,
-    width,
-    variant,
-    size,
-    icon,
-    intent,
-    isLoading,
-    isDisabled,
-    type,
-  } = props;
-  const buttonContextValues = useMemo(
-    () => ({
-      isLoading,
-      iconOnly: icon,
-      size,
-    }),
-    [isLoading, icon, size],
-  );
-
-  const hasIcon = React.Children.toArray(children).some(
-    (child) => React.isValidElement(child) && child.type === ButtonIcon,
-  );
-
-  // have to use react-aria's useButton hook because of the way it handles press events
-  // if any third party library injects "onClick" or "onPointerDown" props (e.g. radix)
-  // it would not be propagated to the button
-  const { onPointerDown, onClick, ...sanitizedProps } = props;
-  const { buttonProps } = useButton(
-    sanitizedProps,
-    ref as React.RefObject<Element>,
-  );
-
-  const { onPointerDown: ariaOnPointerDown, onClick: ariaOnClick } =
-    buttonProps;
-
-  return (
-    <ButtonContext.Provider value={buttonContextValues}>
-      <button
-        {...buttonProps}
-        className={cn(
-          buttonVariants({
-            variant,
-            size,
-            width,
-            icon,
-            intent,
-          }),
-          className,
-        )}
-        onPointerDown={(e) => {
-          if (onPointerDown !== undefined) {
-            onPointerDown(e);
-          }
-
-          ariaOnPointerDown?.(e);
-        }}
-        onClick={(e) => {
-          if (onClick !== undefined) {
-            onClick(e);
-          }
-
-          ariaOnClick?.(e);
-        }}
-        disabled={isLoading || isDisabled}
-        type={props.form !== undefined ? "submit" : type}
-        form={props.form}
-        ref={ref}
-      >
-        <>
-          {!hasIcon && <ButtonLoader />}
-          {children}
-        </>
-      </button>
-    </ButtonContext.Provider>
-  );
-});
-
-/* ---------------------------------- Icon ---------------------------------- */
+  children?: React.ReactNode;
+  className?: string;
+} & VariantProps<typeof buttonIconVariants>;
 
 export const ButtonIcon = ({
-  icon,
+  size,
+  isLoading,
+  children,
   className,
-  only,
-}: {
-  icon?: React.ReactNode;
-  className?: string;
-  only?: boolean;
-}) => {
-  const { isLoading, iconOnly } = useButtonContext();
-  const isIconOnly = iconOnly || only;
-
-  if (isLoading) {
-    return (
-      <Loader2
-        aria-hidden="true"
-        className={cn("h-4 w-4 animate-spin", !isIconOnly && "mr-2", className)}
-      />
-    );
-  }
-
+}: ButtonIconProps) => {
   return (
     <Slot
-      className={cn("h-4 w-4", !isIconOnly && "mr-2", className)}
       aria-hidden="true"
+      className={cn(
+        buttonIconVariants({ size }),
+        isLoading && "invisible",
+        className,
+      )}
     >
-      {icon}
+      {children}
     </Slot>
-  );
-};
-
-/* --------------------------------- Loader --------------------------------- */
-
-export const ButtonLoader = ({ show }: { show?: boolean }) => {
-  const { isLoading } = useButtonContext();
-
-  if (isLoading ?? show) {
-    return <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />;
-  }
-
-  return null;
-};
-
-/* ------------------------------- CloseDialog ------------------------------ */
-
-export type CloseDialogButtonProps = Omit<
-  React.ComponentPropsWithRef<typeof Button>,
-  "onPress"
-> & {
-  close: () => void;
-};
-
-export const CloseDialogButton = ({
-  close,
-  children,
-  variant,
-  ...props
-}: CloseDialogButtonProps) => {
-  return (
-    <Button {...props} onPress={close} variant={variant ?? "outline"}>
-      {children ?? "Abbrechen"}
-    </Button>
   );
 };

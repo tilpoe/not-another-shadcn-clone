@@ -81,7 +81,7 @@ module.exports = {
     },
   },
   plugins: [
-    require("tailwindcss-animate"), // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
-    require("tailwindcss-react-aria-components")({ prefix: "s" }),
+    require("tailwindcss-animate"),
+    require("tailwindcss-react-aria-components"),
   ],
 };

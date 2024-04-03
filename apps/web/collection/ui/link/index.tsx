@@ -1,29 +1,32 @@
-import type { LinkProps } from "next/link";
+import type { ComponentPropsWithoutRef } from "react";
 import NextLink from "next/link";
-import { cva } from "cva";
+import { tv } from "tailwind-variants";
 
-import { autoRef, cn } from "@/lib/utils";
+import type { NextRoute } from "@/lib/navigation";
+import { cn } from "@/lib/ui";
 
-export const linkVariants = {
-  root: cva({
-    base: "mt-2 block text-xs text-muted-foreground underline hover:text-foreground",
-  }),
-};
+export const linkVariants = tv({
+  base: "block text-xs text-muted-foreground underline hover:text-foreground",
+});
 
-const LinkInternal = <TRoute,>({
-  styled,
-  className,
-  ...restProps
-}: LinkProps<TRoute> & {
+type LinkProps<T> = {
   styled?: boolean;
-  className?: string;
-}) => {
+} & (
+  | (ComponentPropsWithoutRef<"a"> & {
+      external: true;
+    })
+  | (Omit<ComponentPropsWithoutRef<typeof NextLink>, "href"> & {
+      external?: false;
+      href: NextRoute<T>;
+    })
+);
+
+export const Link = <T,>({ styled, className, ...props }: LinkProps<T>) => {
+  if (props.external) {
+    return <a {...props} className={cn(styled && linkVariants(), className)} />;
+  }
+
   return (
-    <NextLink
-      {...restProps}
-      className={cn(styled && linkVariants.root(), className)}
-    />
+    <NextLink {...props} className={cn(styled && linkVariants(), className)} />
   );
 };
-
-export const Link = autoRef(LinkInternal);

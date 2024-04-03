@@ -1,83 +1,107 @@
 "use client";
 
-import * as React from "react";
-import * as TabsPrimitive from "@radix-ui/react-tabs";
-import { cva } from "cva";
+import type {
+  TabPanelProps as RACTabPanelProps,
+  TabProps as RACTabProps,
+  TabListProps,
+  TabsProps,
+} from "react-aria-components";
+import {
+  Tab as RACTab,
+  TabList as RACTabList,
+  TabPanel as RACTabPanel,
+  Tabs as RACTabs,
+} from "react-aria-components";
+import { tv } from "tailwind-variants";
 
-import { autoRef, cn } from "@/lib/utils";
+import { composeClassName, focusRing } from "@/lib/ui";
 
-/* -------------------------------------------------------------------------- */
-/*                                  Variants                                  */
-/* -------------------------------------------------------------------------- */
-
-export const tabsVariants = {
-  list: cva({
-    base: "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
-  }),
-  trigger: cva({
-    base: cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-      "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
-    ),
-  }),
-  content: cva({
-    base: "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-  }),
-};
-
-/* -------------------------------------------------------------------------- */
-/*                                 Components                                 */
-/* -------------------------------------------------------------------------- */
-
-/* ---------------------------------- Root ---------------------------------- */
-
-export const Tabs = TabsPrimitive.Root;
-
-/* ---------------------------------- List ---------------------------------- */
-
-export type TabsListProps = React.ComponentPropsWithRef<
-  typeof TabsPrimitive.List
->;
-
-export const TabsList = autoRef(({ className, ...props }: TabsListProps) => {
-  return (
-    <TabsPrimitive.List
-      className={cn(tabsVariants.list(), className)}
-      {...props}
-    />
-  );
+const tabsVariants = tv({
+  base: "flex gap-4",
+  variants: {
+    orientation: {
+      horizontal: "flex-col",
+      vertical: "flex-row w-[800px]",
+    },
+  },
 });
 
-/* --------------------------------- Trigger -------------------------------- */
+export function Tabs(props: TabsProps) {
+  return (
+    <RACTabs
+      {...props}
+      className={composeClassName(props.className, (className, renderProps) =>
+        tabsVariants({ ...renderProps, className }),
+      )}
+    />
+  );
+}
 
-export type TabsTriggerProps = React.ComponentPropsWithRef<
-  typeof TabsPrimitive.Trigger
->;
-
-export const TabsTrigger = autoRef(
-  ({ className, ...props }: TabsTriggerProps) => {
-    return (
-      <TabsPrimitive.Trigger
-        className={cn(tabsVariants.trigger(), className)}
-        {...props}
-      />
-    );
+const tabListVariants = tv({
+  base: "flex gap-1",
+  variants: {
+    orientation: {
+      horizontal: "flex-row",
+      vertical: "flex-col items-start",
+    },
   },
-);
+});
 
-/* --------------------------------- Content -------------------------------- */
+export function TabList<T extends object>(props: TabListProps<T>) {
+  return (
+    <RACTabList
+      {...props}
+      className={composeClassName(props.className, (className, renderProps) =>
+        tabListVariants({ ...renderProps, className }),
+      )}
+    />
+  );
+}
 
-export type TabsContentProps = React.ComponentPropsWithRef<
-  typeof TabsPrimitive.Content
->;
-
-export const TabsContent = autoRef(
-  ({ className, ...props }: TabsContentProps) => {
-    return (
-      <TabsPrimitive.Content
-        className={cn(tabsVariants.content(), className)}
-        {...props}
-      />
-    );
+const tabVariants = tv({
+  extend: focusRing,
+  base: "whitespace-nowrap border-b-2 border-transparent px-2 py-3 font-medium transition-all hover:border-primary hover:text-primary select-none",
+  variants: {
+    isSelected: {
+      true: "border-primary text-primary",
+    },
+    isDisabled: {
+      true: "opacity-50 pointer-events-none",
+    },
   },
-);
+});
+
+export type TabProps = Omit<RACTabProps, "id"> & {
+  id: string;
+};
+
+export function Tab(props: TabProps) {
+  return (
+    <RACTab
+      {...props}
+      className={composeClassName(props.className, (className, renderProps) =>
+        tabVariants({ ...renderProps, className }),
+      )}
+    />
+  );
+}
+
+export const tabPanelVariants = tv({
+  extend: focusRing,
+  base: "flex-1 p-4 text-sm",
+});
+
+export type TabPanelProps = Omit<RACTabPanelProps, "id"> & {
+  id: string;
+};
+
+export function TabPanel(props: TabPanelProps) {
+  return (
+    <RACTabPanel
+      {...props}
+      className={composeClassName(props.className, (className, renderProps) =>
+        tabPanelVariants({ ...renderProps, className }),
+      )}
+    />
+  );
+}

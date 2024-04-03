@@ -4,7 +4,7 @@ import { useState } from "react";
 import { z } from "zod";
 
 import { Alert, AlertDescription } from "@/collection/ui/alert";
-import { Button } from "@/collection/ui/button";
+import { Button } from "@/collection/ui/button-3";
 import {
   Card,
   CardContent,

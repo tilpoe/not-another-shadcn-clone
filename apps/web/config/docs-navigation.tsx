@@ -127,6 +127,96 @@ export const docsNavigationConfig: DocsNavItems = [
     title: "UI Components",
     items: [
       {
+        title: "Button",
+        href: "/docs/components/ui/button",
+        items: [],
+      },
+      {
+        title: "Card",
+        href: "/docs/components/ui/card",
+        items: [],
+      },
+      {
+        title: <FormComponent>Checkbox</FormComponent>,
+        href: "/docs/components/ui/checkbox",
+        items: [],
+      },
+      {
+        title: <FormComponent>Combo Box</FormComponent>,
+        href: "/docs/components/ui/combo-box",
+        items: [],
+      },
+      {
+        title: "Dialog",
+        href: "/docs/components/ui/dialog",
+        items: [],
+      },
+      {
+        title: "Link",
+        href: "/docs/components/ui/link",
+        items: [],
+      },
+      {
+        title: "ListBox",
+        href: "/docs/components/ui/list-box",
+        items: [],
+      },
+      {
+        title: "Menu",
+        href: "/docs/components/ui/menu",
+        items: [],
+      },
+      {
+        title: <FormComponent>Number Field</FormComponent>,
+        href: "/docs/components/ui/number-field",
+        items: [],
+      },
+      {
+        title: "Page Utils",
+        href: "/docs/components/ui/page",
+        items: [],
+      },
+      {
+        title: "Popover",
+        href: "/docs/components/ui/popover",
+        items: [],
+      },
+      {
+        title: <FormComponent>Radio Group</FormComponent>,
+        href: "/docs/components/ui/radio-group",
+        items: [],
+      },
+      {
+        title: <FormComponent>Search Field</FormComponent>,
+        href: "/docs/components/ui/search-field",
+        items: [],
+      },
+      {
+        title: <FormComponent>Select</FormComponent>,
+        href: "/docs/components/ui/select",
+        items: [],
+      },
+      {
+        title: "Separator",
+        href: "/docs/components/ui/separator",
+        items: [],
+      },
+      {
+        title: <FormComponent>Switch</FormComponent>,
+        href: "/docs/components/ui/switch",
+        items: [],
+      },
+      {
+        title: "Tabs",
+        href: "/docs/components/ui/tabs",
+        items: [],
+      },
+      {
+        title: <FormComponent>Text Field</FormComponent>,
+        href: "/docs/components/ui/text-field",
+        items: [],
+      },
+      /*       {
         title: "Accordion",
         href: "/docs/components/ui/accordion",
         items: [],
@@ -157,21 +247,6 @@ export const docsNavigationConfig: DocsNavItems = [
         items: [],
       },
       {
-        title: "Button",
-        href: "/docs/components/ui/button",
-        items: [],
-      },
-      {
-        title: "Card",
-        href: "/docs/components/ui/card",
-        items: [],
-      },
-      {
-        title: <FormComponent>Checkbox</FormComponent>,
-        href: "/docs/components/ui/checkbox",
-        items: [],
-      },
-      {
         title: "Collapsible",
         href: "/docs/components/ui/collapsible",
         items: [],
@@ -187,26 +262,6 @@ export const docsNavigationConfig: DocsNavItems = [
         items: [],
       },
       {
-        title: "Dialog",
-        href: "/docs/components/ui/dialog",
-        items: [],
-      },
-      {
-        title: "Drawer",
-        href: "/docs/components/ui/drawer",
-        items: [],
-      },
-      {
-        title: "Dropdown Menu",
-        href: "/docs/components/ui/dropdown-menu",
-        items: [],
-      },
-      {
-        title: <Obligatory>Form</Obligatory>,
-        href: "/docs/components/ui/form",
-        items: [],
-      },
-      {
         title: "Loader",
         href: "/docs/components/ui/loader",
         items: [],
@@ -216,29 +271,10 @@ export const docsNavigationConfig: DocsNavItems = [
         href: "/docs/components/ui/meter",
         items: [],
       },
-      {
-        title: <FormComponent>Number Field</FormComponent>,
-        href: "/docs/components/ui/number-field",
-        items: [],
-      },
-      {
-        title: "Page Utils",
-        href: "/docs/components/ui/page",
-        items: [],
-      },
-      {
-        title: "Popover",
-        href: "/docs/components/ui/popover",
-        items: [],
-      },
+
       {
         title: "Progress",
         href: "/docs/components/ui/progress",
-        items: [],
-      },
-      {
-        title: <FormComponent>Radio Group</FormComponent>,
-        href: "/docs/components/ui/radio-group",
         items: [],
       },
       {
@@ -246,21 +282,7 @@ export const docsNavigationConfig: DocsNavItems = [
         href: "/docs/components/ui/scroll-area",
         items: [],
       },
-      {
-        title: <FormComponent>Search Field</FormComponent>,
-        href: "/docs/components/ui/search-field",
-        items: [],
-      },
-      {
-        title: <FormComponent>Select</FormComponent>,
-        href: "/docs/components/ui/select",
-        items: [],
-      },
-      {
-        title: "Separator",
-        href: "/docs/components/ui/separator",
-        items: [],
-      },
+
       {
         title: "Sheet",
         href: "/docs/components/ui/sheet",
@@ -277,35 +299,15 @@ export const docsNavigationConfig: DocsNavItems = [
         items: [],
       },
       {
-        title: <FormComponent>Switch</FormComponent>,
-        href: "/docs/components/ui/switch",
-        items: [],
-      },
-      {
         title: "Table",
         href: "/docs/components/ui/table",
-        items: [],
-      },
-      {
-        title: "Tabs",
-        href: "/docs/components/ui/tabs",
-        items: [],
-      },
-      {
-        title: <FormComponent>Text Field</FormComponent>,
-        href: "/docs/components/ui/text-field",
-        items: [],
-      },
-      {
-        title: <FormComponent>Text Area Field</FormComponent>,
-        href: "/docs/components/ui/text-area-field",
         items: [],
       },
       {
         title: "Typography",
         href: "/docs/components/ui/typography",
         items: [],
-      },
+      }, */
     ],
   },
 ];

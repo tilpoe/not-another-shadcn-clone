@@ -1,200 +1,125 @@
-"use client";
-
-import type { JSXElementConstructor, ReactElement } from "react";
-import { Slot } from "@radix-ui/react-slot";
-import type { VariantProps } from "cva";
-import { cva } from "cva";
-import { AlertTriangle, HelpCircle, Info, X } from "lucide-react";
+import { XIcon } from "lucide-react";
 import type { ModalRenderProps } from "react-aria-components";
 import {
   Heading,
   Modal,
   ModalOverlay,
-  Dialog as RaDialog,
-  DialogTrigger as RaDialogTrigger,
+  Dialog as RACDialog,
 } from "react-aria-components";
+import type { VariantProps } from "tailwind-variants";
+import { tv } from "tailwind-variants";
 
-import { Button, ButtonIcon } from "@/collection/ui/button";
-import { autoRef, cn, withRenderProps } from "@/lib/utils";
-
-/* -------------------------------------------------------------------------- */
-/*                                  Variants                                  */
-/* -------------------------------------------------------------------------- */
-
-export const dialogVariants = {
-  overlay: cva({
-    base: cn(
-      "fixed inset-0 z-50 flex min-h-full items-center justify-center overflow-y-auto bg-black/25 p-4 text-center backdrop-blur",
-      "s-entering:animate-in s-entering:fade-in s-entering:duration-300 s-entering:ease-out",
-      "s-exiting:animate-out s-exiting:fade-out s-exiting:duration-200 s-exiting:ease-in",
-    ),
-  }),
-  root: cva({
-    base: cn(
-      "w-full overflow-hidden rounded-lg text-left align-middle shadow-lg",
-      "sm:max-h-[90%]",
-      "s-entering:animate-in s-entering:zoom-in-95 s-entering:duration-300",
-      "s-exiting:animate-out s-exiting:zoom-out-95 s-exiting:duration-200",
-    ),
-    variants: {
-      size: {
-        default: "sm:max-w-lg",
-        lg: "sm:max-w-3xl",
-        xl: "sm:max-w-6xl",
-      },
-    },
-    defaultVariants: {
-      size: "default",
-    },
-  }),
-  rootInner: cva({
-    base: cn("relative outline-none flex flex-col h-full bg-white"),
-  }),
-  header: cva({
-    base: cn("flex flex-col space-y-1.5 text-center sm:text-left shrink-0"),
-  }),
-  title: cva({
-    base: cn("px-6 pt-6 text-lg font-semibold leading-none tracking-tight"),
-  }),
-  description: cva({
-    base: "px-6 text-sm text-muted-foreground",
-  }),
-  body: cva({
-    base: cn("flex flex-col overflow-y-auto px-6 py-6"),
-    variants: {
-      isDescription: {
-        true: "text-muted-foreground",
-        false: "",
-      },
-    },
-    defaultVariants: {
-      isDescription: false,
-    },
-  }),
-  footer: cva({
-    base: cn(
-      "flex flex-col-reverse gap-2 px-6 pb-6 sm:flex-row sm:justify-end sm:gap-0 sm:space-x-2 shrink-0",
-    ),
-  }),
-};
-
-/* -------------------------------------------------------------------------- */
-/*                                 Components                                 */
-/* -------------------------------------------------------------------------- */
-
-/* --------------------------------- Trigger -------------------------------- */
-
-export const DialogTrigger = RaDialogTrigger;
+import type { ButtonProps } from "@/collection/ui/button";
+import { Button } from "@/collection/ui/button";
+import { autoRef, cn, composeClassName, withRenderProps } from "@/lib/ui";
 
 /* ---------------------------------- Root ---------------------------------- */
 
+export const dialogOverlayVariants = tv({
+  base: "fixed inset-0 z-50 flex min-h-full items-center justify-center overflow-y-auto bg-black/25 p-4 text-center backdrop-blur",
+  variants: {
+    isEntering: {
+      true: "animate-in fade-in duration-300 ease-out",
+    },
+    isExiting: {
+      true: "animate-out fade-out duration-200 ease-in",
+    },
+  },
+});
+
+const dialogRootVariants = tv({
+  base: cn(
+    "w-full overflow-hidden rounded-lg text-left align-middle shadow-lg",
+    "sm:max-h-[90%]",
+  ),
+  variants: {
+    isEntering: {
+      true: "animate-in zoom-in-95 duration-300",
+    },
+    isExiting: {
+      true: "animate-out zoom-out-95 duration-200",
+    },
+    size: {
+      default: "sm:max-w-lg",
+      lg: "sm:max-w-3xl",
+      xl: "sm:max-w-6xl",
+    },
+  },
+  defaultVariants: {
+    size: "default",
+  },
+});
+
 export type DialogProps = Omit<
   React.ComponentPropsWithRef<typeof Modal>,
-  "children"
+  "children" | "className"
 > &
-  VariantProps<typeof dialogVariants.root> & {
+  VariantProps<typeof dialogRootVariants> & {
     children?:
       | React.ReactNode
       | ((values: ModalRenderProps & { close: () => void }) => React.ReactNode);
-  } & {
-    isAlert?: boolean;
-    icon?:
-      | "alert"
-      | "info"
-      | "question"
-      | ReactElement<any, string | JSXElementConstructor<any>>;
-    ["aria-label"]?: string;
     classNames?: {
-      icon?: string;
+      overlay?: string | ((values: ModalRenderProps) => string);
+      root?: string | ((values: ModalRenderProps) => string);
+      inner?: string;
+      closeButton?: string;
     };
+    isAlert?: boolean;
   };
 
 export const Dialog = autoRef(
   ({
-    className,
     children,
-    size,
     isAlert,
-    icon,
-    "aria-label": ariaLabel,
-    isDismissable = true,
     classNames,
+    size,
+    isDismissable = true,
     ...props
   }: DialogProps) => {
-    let dialogIcon: React.ReactNode;
-    switch (icon) {
-      case "alert": {
-        dialogIcon = <AlertTriangle />;
-        break;
-      }
-      case "info": {
-        dialogIcon = <Info />;
-        break;
-      }
-      case "question": {
-        dialogIcon = <HelpCircle />;
-        break;
-      }
-      default:
-        dialogIcon = icon;
-    }
-
     return (
       <ModalOverlay
         {...props}
-        className={dialogVariants.overlay()}
+        className={composeClassName(
+          classNames?.overlay,
+          (className, renderProps) =>
+            dialogOverlayVariants({ ...renderProps, className }),
+        )}
         isDismissable={isDismissable}
       >
         <Modal
-          className={cn(dialogVariants.root({ size }), className)}
+          className={composeClassName(
+            classNames?.root,
+            (className, renderProps) =>
+              dialogRootVariants({ ...renderProps, size, className }),
+          )}
           {...props}
         >
           {(modalValues) => (
-            <RaDialog
-              aria-label={ariaLabel}
+            <RACDialog
               role={isAlert ? "alertdialog" : "dialog"}
-              className={cn(dialogVariants.rootInner())}
+              className={cn(
+                "relative flex h-full flex-col bg-white outline-none",
+                classNames?.inner,
+              )}
             >
               {({ close }) => (
                 <>
-                  {icon ? (
-                    <Slot className="absolute right-6 top-6 h-6 w-6 opacity-30">
-                      {dialogIcon}
-                    </Slot>
-                  ) : (
-                    <Button
-                      icon
-                      variant="ghost"
-                      className={cn("absolute right-4 top-4", classNames?.icon)}
-                      onPress={close}
-                    >
-                      <ButtonIcon icon={<X />} />
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost/secondary"
+                    className={cn(
+                      "absolute right-4 top-4",
+                      classNames?.closeButton,
+                    )}
+                    onPress={close}
+                    icon={<XIcon />}
+                  />
                   {withRenderProps(children)({ ...modalValues, close })}
                 </>
               )}
-            </RaDialog>
+            </RACDialog>
           )}
         </Modal>
       </ModalOverlay>
-    );
-  },
-);
-
-/* --------------------------------- Overlay -------------------------------- */
-
-export type DialogOverlayProps = React.ComponentPropsWithRef<
-  typeof ModalOverlay
->;
-
-export const DialogOverlay = autoRef(
-  ({ className, ...props }: DialogOverlayProps) => {
-    return (
-      <ModalOverlay
-        className={cn(dialogVariants.overlay(), className)}
-        {...props}
-      />
     );
   },
 );
@@ -206,7 +131,13 @@ export type DialogHeaderProps = React.ComponentPropsWithRef<"div">;
 export const DialogHeader = autoRef(
   ({ className, ...props }: DialogHeaderProps) => {
     return (
-      <div className={cn(dialogVariants.header(), className)} {...props} />
+      <div
+        className={cn(
+          "flex shrink-0 flex-col space-y-1.5 text-center sm:text-left",
+          className,
+        )}
+        {...props}
+      />
     );
   },
 );
@@ -220,7 +151,10 @@ export const DialogTitle = autoRef(
     return (
       <Heading
         slot="title"
-        className={cn(dialogVariants.title(), className)}
+        className={cn(
+          "px-6 pt-6 text-lg font-semibold tracking-tight",
+          className,
+        )}
         {...props}
       />
     );
@@ -234,21 +168,37 @@ export type DialogDescriptionProps = React.ComponentPropsWithRef<"p">;
 export const DialogDescription = autoRef(
   ({ className, ...props }: DialogDescriptionProps) => {
     return (
-      <p className={cn(dialogVariants.description(), className)} {...props} />
+      <p
+        className={cn("px-6 text-sm text-muted-foreground", className)}
+        {...props}
+      />
     );
   },
 );
 
 /* ---------------------------------- Body ---------------------------------- */
 
+const dialogBodyVariants = tv({
+  base: "flex flex-col overflow-y-auto px-6 py-6",
+  variants: {
+    isDescription: {
+      true: "text-muted-foreground",
+      false: "",
+    },
+  },
+  defaultVariants: {
+    isDescription: false,
+  },
+});
+
 export type DialogBodyProps = React.ComponentPropsWithRef<"div"> &
-  VariantProps<typeof dialogVariants.body>;
+  VariantProps<typeof dialogBodyVariants>;
 
 export const DialogBody = autoRef(
   ({ className, isDescription, ...props }: DialogBodyProps) => {
     return (
       <div
-        className={cn(dialogVariants.body({ isDescription }), className)}
+        className={cn(dialogBodyVariants({ isDescription }), className)}
         {...props}
       />
     );
@@ -262,7 +212,40 @@ export type DialogFooterProps = React.ComponentPropsWithRef<"div">;
 export const DialogFooter = autoRef(
   ({ className, ...props }: DialogFooterProps) => {
     return (
-      <div className={cn(dialogVariants.footer(), className)} {...props} />
+      <div
+        className={cn(
+          "flex shrink-0 flex-col-reverse gap-2 px-6 pb-6 sm:flex-row sm:justify-end sm:gap-0 sm:space-x-2",
+          className,
+        )}
+        {...props}
+      />
     );
   },
 );
+
+/* ---------------------------- CloseDialogButton --------------------------- */
+
+export type CloseDialogButtonProps = ButtonProps & {
+  close: () => void;
+};
+
+export const CloseDialogButton = ({
+  close,
+  children,
+  onPress,
+  variant,
+  ...props
+}: CloseDialogButtonProps) => {
+  return (
+    <Button
+      variant={variant ?? "outline/secondary"}
+      onPress={(e) => {
+        onPress?.(e);
+        close();
+      }}
+      {...props}
+    >
+      {children ?? "Abbrechen"}
+    </Button>
+  );
+};

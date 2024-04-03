@@ -15,7 +15,7 @@ import {
   Users,
 } from "lucide-react";
 
-import { Button } from "@/collection/ui/button";
+import { Button } from "@/collection/ui/button-3";
 import {
   DropdownMenu,
   DropdownMenuContent,

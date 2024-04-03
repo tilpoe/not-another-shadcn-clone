@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { Button } from "@/collection/ui/button";
+import { Button } from "@/collection/ui/button-3";
 import {
   Collapsible,
   CollapsibleContent,
